@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RIHITO SHOP</title>
+<style>
+:root{
+  --bg:#000000;
+  --blue:#00eaff;
+  --blue-dim:rgba(0,234,255,.22);
+  --blue-glow:rgba(0,234,255,.08);
+  --text:#eef6fa;
+  --muted:#7f93a0;
+  --line:#141c26;
+}
+* { box-sizing: border-box; }
+html { height: 100%; }
+body { margin: 0; min-height: 100vh; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); transition: .3s; }
+
+#loginPage { min-height: 100vh; width: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; background: var(--bg); }
+.login-box { width: 100%; max-width: 380px; margin: 0 auto; padding: 32px; background: #000; border: 1px solid var(--blue); border-radius: 22px; text-align: center; box-shadow: 0 0 40px var(--blue-glow); }
+.logo { color: var(--blue); font-size: 30px; font-weight: bold; margin-bottom: 8px; }
+.subtitle { color: var(--muted); font-size: 14px; margin-bottom: 25px; }
+input { width: 100%; padding: 14px; margin-bottom: 12px; background: #000; color: white; border: 1px solid var(--line); border-radius: 10px; outline: none; }
+input:focus { border-color: var(--blue); }
+.login-button { width: 100%; padding: 14px; border: none; border-radius: 10px; background: var(--blue); color: #001014; font-weight: bold; cursor: pointer; }
+.create-account { display: inline-block; margin-top: 15px; color: var(--blue); font-size: 12px; cursor: pointer; }
+#loginMessage { margin-top: 15px; color: var(--blue); font-size: 13px; }
+
+#app { display: none; min-height: 100vh; }
+.header { height: 72px; display: flex; align-items: center; padding: 0 18px; background: #000; border-bottom: 1px solid var(--blue-dim); position: sticky; top: 0; z-index: 20; }
+.shop-logo { color: var(--blue); font-size: 20px; font-weight: bold; }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.credit { display:flex; align-items:center; gap:6px; font-size: 13px; color: var(--text); padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.credit span { color: var(--blue); font-weight: bold; }
+
+.menu-container { position: relative; margin-right: 2px; }
+.menu-button { width: 43px; height: 43px; border-radius: 10px; border: 1px solid var(--line); background: #000; color: white; font-size: 21px; cursor: pointer; }
+.side-menu { display: none; position: absolute; top: 53px; left: 0; width: 220px; background: #000; border: 1px solid var(--blue-dim); border-radius: 14px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.6); z-index: 30; }
+.side-menu.show { display: block; }
+.menu-title { padding: 10px; color: var(--blue); font-weight: bold; font-size: 14px; border-bottom: 1px solid var(--line); margin-bottom: 5px; }
+.menu-option { width: 100%; padding: 12px; background: transparent; color: white; border: none; border-radius: 9px; text-align: left; cursor: pointer; display:flex; align-items:center; justify-content:space-between; font-size:13.5px; }
+.menu-option:hover { background: #0a0f14; }
+.lang-submenu { display: none; flex-direction: column; padding: 4px 4px 4px 18px; }
+.lang-submenu.show { display: flex; }
+.lang-submenu button { text-align:left; background:transparent; border:none; color:#cfe3e8; padding:10px 8px; font-size:13px; cursor:pointer; border-radius:8px; }
+.lang-submenu button:hover { background:#0a0f14; color: var(--blue); }
+.dark-row { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; }
+.dark-row span { font-size: 13.5px; }
+.switch { position: relative; width: 42px; height: 24px; flex-shrink:0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch-track { position: absolute; cursor: pointer; inset: 0; background: #1c2833; border-radius: 24px; transition: .25s; }
+.switch-track::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .25s; }
+.switch input:checked + .switch-track { background: var(--blue); }
+.switch input:checked + .switch-track::before { transform: translateX(18px); }
+
+.profile-container { position: relative; }
+.profile-button { width: 43px; height: 43px; border-radius: 50%; border: 1px solid var(--blue); background: #000; color: var(--blue); font-size: 19px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.profile-menu { display: none; position: absolute; top: 53px; right: 0; width: 250px; background: #000; border: 1px solid var(--blue-dim); border-radius: 16px; padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.6); z-index: 30; }
+.profile-menu.show { display: block; }
+.pm-head { display:flex; align-items:center; gap:12px; padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:10px; }
+.pm-avatar { width:44px; height:44px; border-radius:50%; border:2px solid var(--blue); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.pm-name { font-weight:bold; font-size:14.5px; }
+.pm-view-profile { font-size:11.5px; color: var(--blue); cursor:pointer; margin-top:2px; }
+.pm-credit-row { padding: 10px 2px 4px; }
+.pm-credit-amount { font-size:15px; font-weight:bold; color:#ffd166; }
+.pm-actions-row { display:flex; gap:8px; padding: 8px 2px 6px; }
+.pm-recharge-btn { flex:1; padding:10px; border-radius:10px; border:1px solid var(--blue); background:transparent; color: var(--blue); font-weight:bold; font-size:12px; cursor:pointer; }
+.pm-recharge-btn:hover { background: rgba(0,234,255,.08); }
+.pm-future-box { flex:1; border:1px solid var(--line); border-radius:10px; }
+.pm-region { padding: 10px 2px; }
+.pm-region label { display:block; font-size:11.5px; color: var(--muted); margin-bottom:6px; }
+.pm-region select { width:100%; padding:9px 10px; background:#000; border:1px solid var(--line); border-radius:9px; color:white; font-size:13px; }
+.pm-divider { height:1px; background: var(--line); margin: 8px 0; }
+.pm-item { width:100%; text-align:left; background:transparent; border:none; color:#dce3eb; padding:11px 4px; font-size:13.5px; cursor:pointer; border-radius:8px; }
+.pm-item:hover { background:#0a0f14; color: var(--blue); }
+.pm-logout { color:#ff6a6a; }
+.pm-logout:hover { color:#ff8a8a; background:#150808; }
+
+.main { max-width: 900px; margin: auto; padding: 35px 18px 70px; }
+.welcome { padding: 4px 4px 20px 16px; border-left: 3px solid var(--blue); margin-bottom: 26px; }
+.welcome h1 { margin: 0 0 8px; font-size: 26px; }
+.welcome p { margin: 0; color: var(--muted); }
+
+.store-section-title { margin: 4px 2px 12px; font-size: 15px; color: var(--muted); }
+
+.buy-cta-main { width:100%; padding:18px; border:none; border-radius:14px; background: var(--blue); color:#001014; font-weight:bold; font-size:16px; cursor:pointer; margin-bottom: 30px; box-shadow: 0 0 25px var(--blue-glow); }
+.buy-cta-main:hover { opacity:.9; }
+
+#gamesSection { display:none; }
+
+/* ---- TARJETAS CUADRADAS DE JUEGOS ---- */
+.store-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 30px; }
+.store-card {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 18px;
+  border: 1px solid var(--blue-dim);
+  box-shadow: 0 0 25px var(--blue-glow);
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+}
+.store-card:hover { border-color: var(--blue); }
+.store-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.store-card .card-label {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 12px 10px 10px;
+  background: linear-gradient(0deg, rgba(0,0,0,.9) 10%, rgba(0,0,0,.4) 60%, transparent);
+  text-align: center;
+  font-weight: bold;
+  font-size: 15px;
+  color: #fff;
+}
+.store-card-empty {
+  aspect-ratio: 1 / 1;
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12.5px;
+  padding: 10px;
+}
+
+#shopView { display: none; }
+.back-row { margin-bottom: 16px; }
+.back-button { display: inline-flex; align-items: center; gap: 6px; padding: 10px 15px; border-radius: 10px; background: #000; border: 1px solid var(--line); color: #cfe3e8; font-size: 13px; cursor: pointer; }
+.back-button:hover { border-color: var(--blue); color: var(--blue); }
+
+.buy-section { padding: 24px; border-radius: 20px; border: 1px solid var(--blue-dim); box-shadow: 0 0 30px var(--blue-glow); margin-bottom: 25px; }
+.buy-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.buy-heading .game-icon { width: 46px; height: 46px; border-radius: 12px; background: linear-gradient(135deg, #ff6a3d, #ffb800); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.buy-heading h2 { margin: 0; font-size: 22px; }
+.buy-heading span.tag { display: inline-block; margin-top: 3px; font-size: 11px; color: #8fe9c9; background: rgba(52, 211, 153, .1); border: 1px solid rgba(52, 211, 153, .3); border-radius: 20px; padding: 3px 9px; }
+.buy-section p.buy-sub { margin: 14px 0 18px; color: #a9c3cc; font-size: 13.5px; }
+
+.id-box { border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 20px; }
+.id-box label { display:block; font-size:12.5px; color: var(--muted); margin-bottom:8px; }
+.id-row { display:flex; gap:10px; }
+.id-row input { flex:1; margin-bottom:0; padding:12px 14px; background:#000; border:1px solid var(--line); border-radius:10px; color:white; font-size:14px; }
+.verify-btn { padding:12px 18px; border:none; border-radius:10px; background: var(--blue); color:#001014; font-weight:bold; font-size:13px; cursor:pointer; white-space:nowrap; }
+.player-info { display:none; margin-top:14px; padding:12px 14px; background:rgba(52,211,153,.06); border:1px solid rgba(52,211,153,.3); border-radius:12px; font-size:13.5px; color:#8fe9c9; }
+.player-info.show { display:block; }
+.id-error { display:none; margin-top:10px; color:#ff6a6a; font-size:12.5px; }
+.id-error.show { display:block; }
+
+.diamond-list { display:flex; flex-direction:column; gap:10px; opacity:.35; pointer-events:none; transition:.3s; margin-bottom:22px; }
+.diamond-list.enabled { opacity:1; pointer-events:auto; }
+.diamond-row { display:flex; align-items:center; gap:14px; padding:14px 16px; border:1px solid var(--line); border-radius:14px; cursor:pointer; transition:.2s; }
+.diamond-row:hover { border-color: var(--blue-dim); }
+.diamond-row.selected { border-color: var(--blue); background: rgba(0,234,255,.05); }
+.diamond-row .pkg-icon { font-size:22px; }
+.diamond-row .row-info { flex:1; }
+.diamond-row .row-amount { font-weight:bold; font-size:15px; }
+.diamond-row .row-bonus { display:block; font-size:11px; color:#34d399; margin-top:2px; }
+.diamond-row .row-price { color: var(--blue); font-weight:bold; font-size:14px; }
+.diamond-row .row-radio { width:20px; height:20px; border-radius:50%; border:2px solid var(--line); flex-shrink:0; position:relative; }
+.diamond-row.selected .row-radio { border-color: var(--blue); }
+.diamond-row.selected .row-radio::after { content:''; position:absolute; top:3px; left:3px; width:10px; height:10px; border-radius:50%; background: var(--blue); }
+
+.confirm-purchase-btn { width:100%; padding:15px; border:none; border-radius:12px; background: var(--blue); color:#001014; font-weight:bold; font-size:14.5px; cursor:pointer; opacity:.4; pointer-events:none; transition:.2s; }
+.confirm-purchase-btn.enabled { opacity:1; pointer-events:auto; }
+
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:200; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.show { display:flex; }
+.modal-box { width:100%; max-width:360px; background:#000; border:1px solid var(--blue); border-radius:20px; padding:26px; text-align:center; box-shadow: 0 0 40px var(--blue-glow); }
+.modal-box h3 { margin:0 0 6px; font-size:19px; }
+.modal-box p.modal-sub { margin:0 0 18px; color: var(--muted); font-size:13px; }
+.modal-summary { border:1px solid var(--line); border-radius:12px; padding:14px; text-align:left; margin-bottom:20px; font-size:13.5px; }
+.modal-summary div { display:flex; justify-content:space-between; padding:5px 0; color:#cfe3e8; }
+.modal-summary div span:last-child { color:white; font-weight:bold; }
+.modal-buttons { display:flex; gap:10px; }
+.modal-buttons button { flex:1; padding:13px; border-radius:10px; border:none; font-weight:bold; font-size:13.5px; cursor:pointer; }
+.modal-cancel { background:transparent; color:#cfe3e8; border:1px solid var(--line) !important; }
+.modal-confirm { background: var(--blue); color:#001014; }
+
+.tx-list { max-height: 320px; overflow-y: auto; text-align: left; margin-bottom: 18px; }
+.tx-item { display:flex; justify-content:space-between; align-items:center; padding: 12px 4px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.tx-item:last-child { border-bottom: none; }
+.tx-name { color: #dce3eb; }
+.tx-amount { color: #ff8a8a; font-weight: bold; }
+.tx-empty { text-align:center; color: var(--muted); font-size: 13px; padding: 20px 0; }
+.close-modal-btn { width:100%; padding:13px; border-radius:10px; border:1px solid var(--line); background:transparent; color:#cfe3e8; font-weight:bold; font-size:13.5px; cursor:pointer; }
+
+.bottom-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap:0; border-top: 1px solid var(--line); margin-top: 6px; }
+.card { padding: 20px 16px; border-right: 1px solid var(--line); }
+.card:last-child { border-right: none; }
+.card-icon { font-size: 22px; margin-bottom: 10px; color: var(--blue); }
+.card h3 { margin: 0 0 7px; font-size: 15px; }
+.card p { margin: 0; color: var(--muted); font-size: 13px; }
+
+#message { display: none; position: fixed; left: 20px; right: 20px; bottom: 25px; max-width: 450px; margin: auto; padding: 14px; text-align: center; background: #000; border: 1px solid var(--blue); border-radius: 12px; color: white; z-index: 100; box-shadow: 0 0 30px var(--blue-glow); }
+
+body.light { background: #f1f4f7; color: #111; }
+body.light .header { background: white; border-color: #dce2e8; }
+body.light .login-box { background: white; }
+body.light .welcome { border-left-color: #0ea5c9; }
+body.light .card, body.light .buy-section, body.light .id-box, body.light .diamond-row, body.light .modal-box, body.light .modal-summary, body.light .side-menu, body.light .profile-menu { background: white; border-color: #dce2e8; box-shadow:none; }
+body.light .store-card { border-color: #dce2e8; box-shadow:none; }
+body.light .bottom-cards { border-color: #dce2e8; }
+body.light .credit, body.light .profile-button, body.light .menu-button, body.light .back-button { background: #f5f6f8; color: #222; border-color: #dce2e8; }
+body.light .menu-option, body.light .pm-item, body.light .lang-submenu button, body.light .pm-name { color: #222; }
+body.light .card p, body.light .welcome p { color: #66717e; }
+body.light .id-box input, body.light .pm-region select { background:#ffffff; color:#111; border-color:#c7e9ee; }
+body.light .diamond-row .row-amount { color:#111; }
+
+@media(max-width:600px) {
+  .shop-logo { font-size: 17px; }
+  .header { padding: 0 10px; }
+  .credit { padding: 8px 10px; font-size: 11px; }
+  .profile-button, .menu-button { width: 40px; height: 40px; }
+  .welcome h1 { font-size: 22px; }
+  .id-row { flex-direction: column; }
+  .bottom-cards { grid-template-columns: 1fr; }
+  .card { border-right: none; border-bottom: 1px solid var(--line); }
+  .card:last-child { border-bottom: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="loginPage">
+  <div class="login-box">
+    <div class="logo">💎 RIHITO SHOP</div>
+    <div class="subtitle">Inicia sesión para continuar</div>
+    <input type="email" id="email" placeholder="Correo electrónico">
+    <input type="password" id="password" placeholder="Contraseña">
+    <button type="button" class="login-button" id="loginButton">INICIAR SESIÓN</button>
+    <span class="create-account">Crear cuenta</span>
+    <div id="loginMessage"></div>
+  </div>
+</div>
+
+<div id="app">
+  <header class="header">
+    <div class="shop-logo">💎 RIHITO SHOP</div>
+    <div class="header-right">
+      <div class="menu-container">
+        <button type="button" class="menu-button" id="menuButton">☰</button>
+        <div class="side-menu" id="sideMenu">
+          <div class="menu-title">⚙️ Configuración</div>
+          <button type="button" class="menu-option" id="langToggleBtn">🌐 Lenguaje <span>›</span></button>
+          <div class="lang-submenu" id="langSubmenu">
+            <button type="button" id="spanishButton">🇪🇸 Español</button>
+            <button type="button" id="englishButton">🇺🇸 English</button>
+          </div>
+          <div class="dark-row">
+            <span>🌙 Modo oscuro</span>
+            <label class="switch">
+              <input type="checkbox" id="darkModeToggle">
+              <span class="switch-track"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="credit">💰 <span id="credit">$10.00</span></div>
+      <div class="profile-container">
+        <button type="button" class="profile-button" id="profileButton">👤</button>
+        <div class="profile-menu" id="profileMenu">
+          <div class="pm-head">
+            <div class="pm-avatar">👤</div>
+            <div>
+              <div class="pm-name">RIHITO</div>
+              <div class="pm-view-profile" id="viewProfileBtn">ver perfil ›</div>
+            </div>
+          </div>
+          <div class="pm-credit-row">
+            <div class="pm-credit-amount">💰 <span id="pmCredit">$10.00</span></div>
+          </div>
+          <div class="pm-actions-row">
+            <button type="button" class="pm-recharge-btn" id="rechargeBtn">RECARGAR</button>
+            <div class="pm-future-box"></div>
+          </div>
+          <div class="pm-region">
+            <label>Su región</label>
+            <select id="regionSelect">
+              <option>Mexico</option>
+              <option>Colombia</option>
+              <option>Argentina</option>
+              <option>Perú</option>
+              <option>Chile</option>
+              <option>Estados Unidos</option>
+            </select>
+          </div>
+          <div class="pm-divider"></div>
+          <button type="button" class="pm-item">Ver resumen de cuenta</button>
+          <button type="button" class="pm-item" id="transaccionesBtn">Transacciones</button>
+          <button type="button" class="pm-item">Notificaciones</button>
+          <div class="pm-divider"></div>
+          <button type="button" class="pm-item pm-logout" id="logoutBtn">Cerrar sesión</button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main class="main">
+
+    <div id="homeView">
+      <section class="welcome">
+        <h1 id="welcomeTitle">Bienvenido a RIHITO SHOP 👋</h1>
+        <p id="welcomeSub">Compra tus recargas de forma rápida y sencilla.</p>
+      </section>
+
+      <button type="button" class="buy-cta-main" id="showGamesBtn">Comprar</button>
+
+      <div id="gamesSection">
+        <div class="store-section-title" id="gamesTitle">🎮 Juegos disponibles</div>
+        <div class="store-grid">
+          <div class="store-card" id="openFreeFireShop">
+            <img src="freefire.jpg" alt="Free Fire">
+            <div class="card-label">Free Fire</div>
+          </div>
+          <div class="store-card-empty">Próximamente<br>más juegos</div>
+        </div>
+      </div>
+
+      <section class="bottom-cards">
+        <div class="card">
+          <div class="card-icon">💎</div>
+          <h3>Recargas</h3>
+          <p>Compra diamantes y otras recargas para tus juegos favoritos.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🛡️</div>
+          <h3>Seguro y rápido</h3>
+          <p>Tu cuenta y tus compras estarán protegidas.</p>
+        </div>
+      </section>
+    </div>
+
+    <div id="shopView">
+      <div class="back-row">
+        <button type="button" class="back-button" id="backToHome">‹ Volver al inicio</button>
+      </div>
+
+      <section class="buy-section">
+        <div class="buy-heading">
+          <div class="game-icon">🔥</div>
+          <div>
+            <h2>Free Fire</h2>
+            <span class="tag">Entrega manual · en línea</span>
+          </div>
+        </div>
+        <p class="buy-sub">Ingresa tu ID de jugador, verifícalo y elige tu paquete.</p>
+
+        <div class="id-box">
+          <label>🆔 ID de jugador</label>
+          <div class="id-row">
+            <input type="text" id="playerIdInput" placeholder="Ej: 8384007639" inputmode="numeric">
+            <button type="button" class="verify-btn" id="verifyBtn">Verificar</button>
+          </div>
+          <div class="player-info" id="playerInfo"></div>
+          <div class="id-error" id="idError">⚠️ Ingresa un ID válido (solo números).</div>
+        </div>
+
+        <div class="diamond-list" id="diamondList">
+          <div class="diamond-row" data-name="100 diamantes" data-price="1.00">
+            <div class="pkg-icon">💎</div>
+            <div class="row-info">
+              <div class="row-amount">100 Diamantes</div>
+            </div>
+            <div class="row-price">$1.00</div>
+            <div class="row-radio"></div>
+          </div>
+          <div class="diamond-row" data-name="310 diamantes bonus" data-price="3.00">
+            <div class="pkg-icon">💎</div>
+            <div class="row-info">
+              <div class="row-amount">310 Diamantes<span class="row-bonus">+31 bonus</span></div>
+            </div>
+            <div class="row-price">$3.00</div>
+            <div class="row-radio"></div>
+          </div>
+          <div class="diamond-row" data-name="520 diamantes bonus" data-price="5.00">
+            <div class="pkg-icon">💎</div>
+            <div class="row-info">
+              <div class="row-amount">520 Diamantes<span class="row-bonus">+52 bonus</span></div>
+            </div>
+            <div class="row-price">$5.00</div>
+            <div class="row-radio"></div>
+          </div>
+          <div class="diamond-row" data-name="1060 diamantes bonus" data-price="10.00">
+            <div class="pkg-icon">💎</div>
+            <div class="row-info">
+              <div class="row-amount">1,060 Diamantes<span class="row-bonus">+106 bonus</span></div>
+            </div>
+            <div class="row-price">$10.00</div>
+            <div class="row-radio"></div>
+          </div>
+          <div class="diamond-row" data-name="2180 diamantes bonus" data-price="20.00">
+            <div class="pkg-icon">💎</div>
+            <div class="row-info">
+              <div class="row-amount">2,180 Diamantes<span class="row-bonus">+218 bonus</span></div>
+            </div>
+            <div class="row-price">$20.00</div>
+            <div class="row-radio"></div>
+          </div>
+          <div class="diamond-row" data-name="5600 diamantes bonus" data-price="50.00">
+            <div class="pkg-icon">💎</div>
+            <div class="row-info">
+              <div class="row-amount">5,600 Diamantes<span class="row-bonus">+560 bonus</span></div>
+            </div>
+            <div class="row-price">$50.00</div>
+            <div class="row-radio"></div>
+          </div>
+          <div class="diamond-row" data-name="Tarjeta Semanal" data-price="1.50">
+            <div class="pkg-icon">⭐</div>
+            <div class="row-info">
+              <div class="row-amount">Tarjeta Semanal<span class="row-bonus">+diamantes diarios</span></div>
+            </div>
+            <div class="row-price">$1.50</div>
+            <div class="row-radio"></div>
+          </div>
+          <div class="diamond-row" data-name="Tarjeta Mensual" data-price="6.00">
+            <div class="pkg-icon">⭐</div>
+            <div class="row-info">
+              <div class="row-amount">Tarjeta Mensual<span class="row-bonus">+diamantes diarios</span></div>
+            </div>
+            <div class="row-price">$6.00</div>
+            <div class="row-radio"></div>
+          </div>
+          <div class="diamond-row" data-name="Pase Booyah" data-price="4.50">
+            <div class="pkg-icon">🎟️</div>
+            <div class="row-info">
+              <div class="row-amount">Pase Booyah<span class="row-bonus">temporada actual</span></div>
+            </div>
+            <div class="row-price">$4.50</div>
+            <div class="row-radio"></div>
+          </div>
+        </div>
+
+        <button type="button" class="confirm-purchase-btn" id="confirmPurchaseBtn">Confirmar compra</button>
+      </section>
+    </div>
+
+  </main>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <h3>Confirmar compra</h3>
+    <p class="modal-sub">Revisa los datos antes de continuar</p>
+    <div class="modal-summary">
+      <div><span>ID de jugador</span><span id="modalId"></span></div>
+      <div><span>Jugador</span><span id="modalName"></span></div>
+      <div><span>Paquete</span><span id="modalPackage"></span></div>
+      <div><span>Total</span><span id="modalPrice"></span></div>
+    </div>
+    <div class="modal-buttons">
+      <button type="button" class="modal-cancel" id="modalCancel">Cancelar</button>
+      <button type="button" class="modal-confirm" id="modalConfirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="txModalOverlay">
+  <div class="modal-box">
+    <h3>Transacciones</h3>
+    <p class="modal-sub">Historial de tus compras</p>
+    <div class="tx-list" id="txList">
+      <div class="tx-empty">Aún no tienes compras registradas.</div>
+    </div>
+    <button type="button" class="close-modal-btn" id="closeTxModal">Cerrar</button>
+  </div>
+</div>
+
+<div id="message"></div>
+<script>
+// ---------- BOTÓN COMPRAR (muestra juegos disponibles) ----------
+document.getElementById("showGamesBtn").addEventListener("click", function() {
+  document.getElementById("gamesSection").style.display = "block";
+});
+
+// ---------- LOGIN ----------
+document.getElementById("loginButton").addEventListener("click", function() {
+  var email = document.getElementById("email").value.trim();
+  var password = document.getElementById("password").value.trim();
+  var message = document.getElementById("loginMessage");
+  if (email === "" || password === "") {
+    message.innerText = "⚠️ Completa el correo y la contraseña.";
+    return;
+  }
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("app").style.display = "block";
+});
+
+// ---------- MENÚS ----------
+var menuButton = document.getElementById("menuButton");
+var sideMenu = document.getElementById("sideMenu");
+var profileButton = document.getElementById("profileButton");
+var profileMenu = document.getElementById("profileMenu");
+
+menuButton.addEventListener("click", function(event) {
+  event.stopPropagation();
+  sideMenu.classList.toggle("show");
+  profileMenu.classList.remove("show");
+});
+
+profileButton.addEventListener("click", function(event) {
+  event.stopPropagation();
+  profileMenu.classList.toggle("show");
+  sideMenu.classList.remove("show");
+});
+
+document.addEventListener("click", function() {
+  sideMenu.classList.remove("show");
+  profileMenu.classList.remove("show");
+});
+
+// ---------- SUBMENÚ DE LENGUAJE ----------
+var langToggleBtn = document.getElementById("langToggleBtn");
+var langSubmenu = document.getElementById("langSubmenu");
+
+langToggleBtn.addEventListener("click", function(event) {
+  event.stopPropagation();
+  langSubmenu.classList.toggle("show");
+});
+
+var textos = {
+  es: {
+    welcomeTitle: "Bienvenido a RIHITO SHOP 👋",
+    welcomeSub: "Compra tus recargas de forma rápida y sencilla.",
+    gamesTitle: "🎮 Juegos disponibles"
+  },
+  en: {
+    welcomeTitle: "Welcome to RIHITO SHOP 👋",
+    welcomeSub: "Buy your top-ups quickly and easily.",
+    gamesTitle: "🎮 Available games"
+  }
+};
+
+function aplicarIdioma(lang) {
+  var t = textos[lang];
+  document.getElementById("welcomeTitle").innerText = t.welcomeTitle;
+  document.getElementById("welcomeSub").innerText = t.welcomeSub;
+  document.getElementById("gamesTitle").innerText = t.gamesTitle;
+}
+
+document.getElementById("spanishButton").addEventListener("click", function(event) {
+  event.stopPropagation();
+  aplicarIdioma("es");
+});
+
+document.getElementById("englishButton").addEventListener("click", function(event) {
+  event.stopPropagation();
+  aplicarIdioma("en");
+});
+
+// ---------- MODO OSCURO (switch on/off) ----------
+var darkModeToggle = document.getElementById("darkModeToggle");
+darkModeToggle.checked = true;
+
+darkModeToggle.addEventListener("click", function(event) {
+  event.stopPropagation();
+});
+
+darkModeToggle.addEventListener("change", function() {
+  if (darkModeToggle.checked) {
+    document.body.classList.remove("light");
+  } else {
+    document.body.classList.add("light");
+  }
+});
+
+// ---------- VER PERFIL (prueba, sin funcionar aún) ----------
+document.getElementById("viewProfileBtn").addEventListener("click", function(event) {
+  event.stopPropagation();
+});
+
+// ---------- RECARGAR -> WHATSAPP ----------
+document.getElementById("rechargeBtn").addEventListener("click", function(event) {
+  event.stopPropagation();
+  var numero = "5351557831";
+  var mensaje = "Hola RIHITO SK me interesa comprar crédito dime el precio?";
+  var url = "https://wa.me/" + numero + "?text=" + encodeURIComponent(mensaje);
+  window.open(url, "_blank");
+});
+
+// ---------- NAVEGACIÓN LOBBY <-> TIENDA ----------
+document.getElementById("openFreeFireShop").addEventListener("click", function() {
+  document.getElementById("homeView").style.display = "none";
+  document.getElementById("shopView").style.display = "block";
+  window.scrollTo(0, 0);
+});
+
+document.getElementById("backToHome").addEventListener("click", function() {
+  document.getElementById("shopView").style.display = "none";
+  document.getElementById("homeView").style.display = "block";
+  resetShopForm();
+  window.scrollTo(0, 0);
+});
+
+// ---------- MENSAJES ----------
+var messageBox = document.getElementById("message");
+function mostrarMensaje(texto) {
+  messageBox.innerText = texto;
+  messageBox.style.display = "block";
+  setTimeout(function() {
+    messageBox.style.display = "none";
+  }, 2500);
+}
+
+// ---------- VERIFICACIÓN DE ID ----------
+var playerIdInput = document.getElementById("playerIdInput");
+var verifyBtn = document.getElementById("verifyBtn");
+var playerInfo = document.getElementById("playerInfo");
+var idError = document.getElementById("idError");
+var diamondList = document.getElementById("diamondList");
+var confirmPurchaseBtn = document.getElementById("confirmPurchaseBtn");
+
+var verifiedId = null;
+var verifiedName = null;
+var selectedPackage = null;
+var selectedPrice = null;
+
+var nombresConocidos = {
+  "8384007639": "RIHITO"
+};
+
+verifyBtn.addEventListener("click", function() {
+  var id = playerIdInput.value.trim();
+
+  if (id === "" || !/^\d+$/.test(id)) {
+    idError.classList.add("show");
+    playerInfo.classList.remove("show");
+    diamondList.classList.remove("enabled");
+    verifiedId = null;
+    checkFormComplete();
+    return;
+  }
+
+  idError.classList.remove("show");
+
+  var nombre = nombresConocidos[id];
+  if (!nombre) {
+    nombre = "Jugador" + id.slice(-4);
+  }
+
+  verifiedId = id;
+  verifiedName = nombre;
+
+  playerInfo.innerText = "✅ Jugador encontrado: " + nombre;
+  playerInfo.classList.add("show");
+  diamondList.classList.add("enabled");
+
+  checkFormComplete();
+});
+
+// ---------- SELECCIÓN DE PAQUETE ----------
+document.querySelectorAll(".diamond-row").forEach(function(row) {
+  row.addEventListener("click", function() {
+    document.querySelectorAll(".diamond-row").forEach(function(r) {
+      r.classList.remove("selected");
+    });
+    row.classList.add("selected");
+    selectedPackage = row.getAttribute("data-name");
+    selectedPrice = parseFloat(row.getAttribute("data-price"));
+    checkFormComplete();
+  });
+});
+
+function checkFormComplete() {
+  if (verifiedId && selectedPackage) {
+    confirmPurchaseBtn.classList.add("enabled");
+  } else {
+    confirmPurchaseBtn.classList.remove("enabled");
+  }
+}
+
+function resetShopForm() {
+  playerIdInput.value = "";
+  verifiedId = null;
+  verifiedName = null;
+  selectedPackage = null;
+  selectedPrice = null;
+  playerInfo.classList.remove("show");
+  idError.classList.remove("show");
+  diamondList.classList.remove("enabled");
+  confirmPurchaseBtn.classList.remove("enabled");
+  document.querySelectorAll(".diamond-row").forEach(function(r) {
+    r.classList.remove("selected");
+  });
+}
+
+// ---------- MODAL DE CONFIRMACIÓN DE COMPRA ----------
+var modalOverlay = document.getElementById("modalOverlay");
+var modalId = document.getElementById("modalId");
+var modalName = document.getElementById("modalName");
+var modalPackage = document.getElementById("modalPackage");
+var modalPrice = document.getElementById("modalPrice");
+
+confirmPurchaseBtn.addEventListener("click", function() {
+  if (!verifiedId || !selectedPackage) return;
+
+  modalId.innerText = verifiedId;
+  modalName.innerText = verifiedName;
+  modalPackage.innerText = selectedPackage;
+  modalPrice.innerText = "$" + selectedPrice.toFixed(2);
+
+  modalOverlay.classList.add("show");
+});
+
+document.getElementById("modalCancel").addEventListener("click", function() {
+  modalOverlay.classList.remove("show");
+});
+
+// ---------- HISTORIAL DE TRANSACCIONES ----------
+var transacciones = [];
+
+document.getElementById("modalConfirm").addEventListener("click", function() {
+  var creditoSpan = document.getElementById("credit");
+  var pmCreditoSpan = document.getElementById("pmCredit");
+  var creditoActual = parseFloat(creditoSpan.innerText.replace("$", ""));
+
+  if (creditoActual < selectedPrice) {
+    modalOverlay.classList.remove("show");
+    mostrarMensaje("⚠️ Crédito insuficiente para esta compra.");
+    return;
+  }
+
+  var nuevoCredito = (creditoActual - selectedPrice).toFixed(2);
+  creditoSpan.innerText = "$" + nuevoCredito;
+  pmCreditoSpan.innerText = "$" + nuevoCredito;
+
+  transacciones.unshift({
+    nombre: selectedPackage,
+    precio: selectedPrice.toFixed(2)
+  });
+
+  modalOverlay.classList.remove("show");
+  mostrarMensaje("✅ Compra realizada para " + verifiedName + " (ID " + verifiedId + ")");
+
+  document.getElementById("shopView").style.display = "none";
+  document.getElementById("homeView").style.display = "block";
+  resetShopForm();
+  window.scrollTo(0, 0);
+});
+
+// ---------- MODAL DE TRANSACCIONES ----------
+var txModalOverlay = document.getElementById("txModalOverlay");
+var txList = document.getElementById("txList");
+var transaccionesBtn = document.getElementById("transaccionesBtn");
+
+transaccionesBtn.addEventListener("click", function(event) {
+  event.stopPropagation();
+  profileMenu.classList.remove("show");
+
+  if (transacciones.length === 0) {
+    txList.innerHTML = '<div class="tx-empty">Aún no tienes compras registradas.</div>';
+  } else {
+    var html = "";
+    transacciones.forEach(function(tx) {
+      html += '<div class="tx-item"><span class="tx-name">' + tx.nombre + '</span><span class="tx-amount">-$' + tx.precio + '</span></div>';
+    });
+    txList.innerHTML = html;
+  }
+
+  txModalOverlay.classList.add("show");
+});
+
+document.getElementById("closeTxModal").addEventListener("click", function() {
+  txModalOverlay.classList.remove("show");
+});
+
+// ---------- CERRAR SESIÓN ----------
+document.getElementById("logoutBtn").addEventListener("click", function(event) {
+  event.stopPropagation();
+  profileMenu.classList.remove("show");
+
+  document.getElementById("app").style.display = "none";
+  document.getElementById("loginPage").style.display = "flex";
+
+  document.getElementById("email").value = "";
+  document.getElementById("password").value = "";
+  document.getElementById("loginMessage").innerText = "";
+
+  document.getElementById("shopView").style.display = "none";
+  document.getElementById("homeView").style.display = "block";
+  resetShopForm();
+
+  document.getElementById("credit").innerText = "$10.00";
+  document.getElementById("pmCredit").innerText = "$10.00";
+  transacciones = [];
+
+  mostrarMensaje("👋 Sesión cerrada correctamente.");
+});
+</script>
+
+</body>
+</html>
