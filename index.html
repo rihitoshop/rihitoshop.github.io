@@ -38,36 +38,17 @@ input:focus { border-color: var(--blue); }
 
 .credit { display:flex; align-items:center; gap:7px; font-size: 13px; color: var(--text); padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; }
 
+/* MONEDA: imagen PNG transparente, sin fondo ni recuadro */
 .coin-icon {
-  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 28%, #fff8dc 0%, #ffe27a 16%, #f7cf3c 38%, #d9a520 62%, #8a6400 90%, #5c4300 100%);
-  border: 1px solid #6b4e00;
-  color: #4a2f00;
-  font-size: 6px;
-  font-weight: 900;
-  letter-spacing: -0.3px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
-  overflow: hidden;
-  box-shadow: 0 0 5px rgba(255,215,0,.65), 0 0 1px rgba(255,255,255,.5), inset 0 -1px 2px rgba(0,0,0,.4);
-  text-shadow: 0 1px 0 rgba(255,255,255,.35);
 }
-.coin-icon.big { width: 19px; height: 19px; font-size: 7.5px; }
-.coin-icon::after {
-  content: "";
-  position: absolute;
-  top: 1.5px; left: 2.5px;
-  width: 42%; height: 26%;
-  background: rgba(255,255,255,.6);
-  border-radius: 50%;
-  filter: blur(0.4px);
-  transform: rotate(-20deg);
-}
+.coin-icon img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.coin-icon.big { width: 22px; height: 22px; }
 
 .menu-container { position: relative; }
 .menu-button {
@@ -119,7 +100,17 @@ input:focus { border-color: var(--blue); }
 .pm-future-box { flex:1; border:1px solid var(--line); border-radius:10px; }
 .pm-region { padding: 10px 2px; }
 .pm-region label { display:block; font-size:11.5px; color: var(--muted); margin-bottom:6px; }
-.pm-region select { width:100%; padding:9px 10px; background:#000; border:1px solid var(--line); border-radius:9px; color:white; font-size:13px; }
+
+/* SELECTOR DE REGIÓN: desplegable con flecha */
+.region-dropdown { position:relative; }
+.region-selected { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border:1px solid var(--blue-dim); background: rgba(0,234,255,.06); border-radius:9px; color: var(--blue); font-weight:bold; font-size:13px; cursor:pointer; }
+.region-arrow { transition:.2s; font-size:11px; }
+.region-arrow.open { transform: rotate(180deg); }
+.region-options { display:none; flex-direction:column; gap:4px; margin-top:6px; }
+.region-options.show { display:flex; }
+.region-option { width:100%; text-align:left; padding:9px 10px; background:transparent; border:1px solid var(--line); border-radius:9px; color:#cfe3e8; font-size:13px; cursor:pointer; }
+.region-option:hover { border-color: var(--blue-dim); color: var(--blue); }
+
 .pm-divider { height:1px; background: var(--line); margin: 8px 0; }
 .pm-item { width:100%; text-align:left; background:transparent; border:none; color:#dce3eb; padding:11px 4px; font-size:13.5px; cursor:pointer; border-radius:8px; }
 .pm-item:hover { background:#0a0f14; color: var(--blue); }
@@ -245,13 +236,6 @@ input:focus { border-color: var(--blue); }
 
 #message { display: none; position: fixed; left: 20px; right: 20px; bottom: 25px; max-width: 450px; margin: auto; padding: 14px; text-align: center; background: #000; border: 1px solid var(--blue); border-radius: 12px; color: white; z-index: 100; box-shadow: 0 0 30px var(--blue-glow); }
 
-.site-footer { margin-top: 30px; padding: 30px 18px 20px; border-top: 1px solid var(--line); background:#000; }
-.footer-inner { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 26px; }
-.footer-col h4 { color: var(--blue); font-size: 14px; margin: 0 0 12px; }
-.footer-col a { display: block; color: var(--muted); font-size: 13px; text-decoration: none; margin-bottom: 8px; cursor:pointer; }
-.footer-col a:hover { color: var(--blue); }
-.footer-bottom { max-width: 900px; margin: 20px auto 0; padding-top: 16px; border-top: 1px solid var(--line); text-align:center; color: var(--muted); font-size: 12px; }
-
 body.light { background: #f1f4f7; color: #111; }
 body.light .header { background: white; border-color: #dce2e8; }
 body.light .login-box { background: white; }
@@ -264,10 +248,8 @@ body.light .menu-button { background: rgba(14,165,201,.1); color:#0ea5c9; }
 body.light .menu-button:hover { background: rgba(14,165,201,.2); }
 body.light .menu-option, body.light .pm-item, body.light .lang-submenu button, body.light .pm-name { color: #222; }
 body.light .card p, body.light .welcome p { color: #66717e; }
-body.light .id-box input, body.light .pm-region select { background:#ffffff; color:#111; border-color:#c7e9ee; }
+body.light .id-box input, body.light .region-option, body.light .region-selected { background:#ffffff; color:#111; border-color:#c7e9ee; }
 body.light .diamond-row .row-amount { color:#111; }
-body.light .site-footer { background:#f1f4f7; border-color:#dce2e8; }
-body.light .footer-bottom { border-color:#dce2e8; }
 body.light .step-label { color:#66717e; }
 body.light .pi-name { color:#111; }
 
@@ -280,7 +262,6 @@ body.light .pi-name { color:#111; }
   .bottom-cards { grid-template-columns: 1fr; }
   .card { border-right: none; border-bottom: 1px solid var(--line); }
   .card:last-child { border-bottom: none; }
-  .footer-inner { grid-template-columns: 1fr; gap: 18px; }
   .store-card, .store-card-empty { width: 130px; }
 }
 </style>
@@ -290,11 +271,11 @@ body.light .pi-name { color:#111; }
 <div id="loginPage">
   <div class="login-box">
     <div class="logo">💎 RIHITO SHOP</div>
-    <div class="subtitle">Inicia sesión para continuar</div>
-    <input type="email" id="email" placeholder="Correo electrónico">
-    <input type="password" id="password" placeholder="Contraseña">
-    <button type="button" class="login-button" id="loginButton">INICIAR SESIÓN</button>
-    <span class="create-account">Crear cuenta</span>
+    <div class="subtitle" data-i18n="loginSubtitle">Inicia sesión para continuar</div>
+    <input type="email" id="email" data-i18n-placeholder="emailPlaceholder" placeholder="Correo electrónico">
+    <input type="password" id="password" data-i18n-placeholder="passwordPlaceholder" placeholder="Contraseña">
+    <button type="button" class="login-button" id="loginButton" data-i18n="loginButtonText">INICIAR SESIÓN</button>
+    <span class="create-account" data-i18n="createAccount">Crear cuenta</span>
     <div id="loginMessage"></div>
   </div>
 </div>
@@ -304,7 +285,7 @@ body.light .pi-name { color:#111; }
     <div class="header-top">
       <div class="shop-logo">💎 RIHITO SHOP</div>
       <div class="header-right">
-        <div class="credit"><span class="coin-icon">SK</span><span id="credit">$10.00</span></div>
+        <div class="credit"><span class="coin-icon"><img src="monedask.png" alt="SK"></span><span id="credit">$0.00</span></div>
         <div class="profile-container">
           <button type="button" class="profile-button" id="profileButton">👤</button>
           <div class="profile-menu" id="profileMenu">
@@ -312,30 +293,32 @@ body.light .pi-name { color:#111; }
               <div class="pm-avatar">👤</div>
               <div>
                 <div class="pm-name">RIHITO</div>
-                <div class="pm-view-profile" id="viewProfileBtn">ver perfil ›</div>
+                <div class="pm-view-profile" id="viewProfileBtn" data-i18n="viewProfile">ver perfil ›</div>
               </div>
             </div>
             <div class="pm-credit-row">
-              <div class="pm-credit-amount"><span class="coin-icon big">SK</span><span id="pmCredit">$10.00</span></div>
+              <div class="pm-credit-amount"><span class="coin-icon big"><img src="monedask.png" alt="SK"></span><span id="pmCredit">$0.00</span></div>
             </div>
             <div class="pm-actions-row">
-              <button type="button" class="pm-recharge-btn" id="rechargeBtn">RECARGAR</button>
+              <button type="button" class="pm-recharge-btn" id="rechargeBtn" data-i18n="recharge">RECARGAR</button>
               <div class="pm-future-box"></div>
             </div>
             <div class="pm-region">
-              <label>Región</label>
-              <select id="regionSelect">
-                <option value="cuba" selected>Cuba</option>
-                <option value="mexico">México</option>
-                <option value="eeuu">Estados Unidos</option>
-              </select>
+              <label data-i18n="regionLabel">Región</label>
+              <div class="region-dropdown" id="regionDropdown">
+                <div class="region-selected" id="regionSelected">
+                  <span id="regionSelectedText">Cuba</span>
+                  <span class="region-arrow" id="regionArrow">▾</span>
+                </div>
+                <div class="region-options" id="regionOptions"></div>
+              </div>
             </div>
             <div class="pm-divider"></div>
-            <button type="button" class="pm-item">Ver resumen de cuenta</button>
-            <button type="button" class="pm-item" id="transaccionesBtn">Transacciones</button>
-            <button type="button" class="pm-item">Notificaciones</button>
+            <button type="button" class="pm-item" data-i18n="accountSummary">Ver resumen de cuenta</button>
+            <button type="button" class="pm-item" id="transaccionesBtn" data-i18n="transactions">Transacciones</button>
+            <button type="button" class="pm-item" data-i18n="notifications">Notificaciones</button>
             <div class="pm-divider"></div>
-            <button type="button" class="pm-item pm-logout" id="logoutBtn">Cerrar sesión</button>
+            <button type="button" class="pm-item pm-logout" id="logoutBtn" data-i18n="logout">Cerrar sesión</button>
           </div>
         </div>
       </div>
@@ -344,14 +327,14 @@ body.light .pi-name { color:#111; }
       <div class="menu-container">
         <button type="button" class="menu-button" id="menuButton">☰</button>
         <div class="side-menu" id="sideMenu">
-          <div class="menu-title">⚙️ Configuración</div>
-          <button type="button" class="menu-option" id="langToggleBtn">🌐 Lenguaje <span>›</span></button>
+          <div class="menu-title" data-i18n="configTitle">⚙️ Configuración</div>
+          <button type="button" class="menu-option" id="langToggleBtn">🌐 <span data-i18n="langOption">Lenguaje</span> <span>›</span></button>
           <div class="lang-submenu" id="langSubmenu">
             <button type="button" id="spanishButton">🇪🇸 Español</button>
             <button type="button" id="englishButton">🇺🇸 English</button>
           </div>
           <div class="dark-row">
-            <span>🌙 Modo oscuro</span>
+            <span data-i18n="darkModeLabel">🌙 Modo oscuro</span>
             <label class="switch">
               <input type="checkbox" id="darkModeToggle">
               <span class="switch-track"></span>
@@ -370,25 +353,25 @@ body.light .pi-name { color:#111; }
         <p id="welcomeSub">Compra tus recargas de forma rápida y sencilla.</p>
       </section>
 
-      <button type="button" class="buy-cta-main" id="showGamesBtn">Comprar</button>
+      <button type="button" class="buy-cta-main" id="showGamesBtn" data-i18n="buyButton">Comprar</button>
 
       <section class="bottom-cards">
         <div class="card">
           <div class="card-icon">💎</div>
-          <h3>Recargas</h3>
-          <p>Compra diamantes y otras recargas para tus juegos favoritos.</p>
+          <h3 data-i18n="cardRechargesTitle">Recargas</h3>
+          <p data-i18n="cardRechargesDesc">Compra diamantes y otras recargas para tus juegos favoritos.</p>
         </div>
         <div class="card">
           <div class="card-icon">🛡️</div>
-          <h3>Seguro y rápido</h3>
-          <p>Tu cuenta y tus compras estarán protegidas.</p>
+          <h3 data-i18n="cardSecureTitle">Seguro y rápido</h3>
+          <p data-i18n="cardSecureDesc">Tu cuenta y tus compras estarán protegidas.</p>
         </div>
       </section>
     </div>
 
     <div id="gamesView">
       <div class="back-row">
-        <button type="button" class="back-button" id="backFromGames">‹ Volver al inicio</button>
+        <button type="button" class="back-button" id="backFromGames" data-i18n="backHome">‹ Volver al inicio</button>
       </div>
       <div class="store-section-title" id="gamesTitle">🎮 Juegos disponibles</div>
       <div class="store-grid">
@@ -396,13 +379,13 @@ body.light .pi-name { color:#111; }
           <img src="freefire.jpg" alt="Free Fire">
           <div class="card-label">Free Fire</div>
         </div>
-        <div class="store-card-empty">Próximamente<br>más juegos</div>
+        <div class="store-card-empty"><span data-i18n="comingSoonText" data-i18n-html="true">Próximamente<br>más juegos</span></div>
       </div>
     </div>
 
     <div id="shopView">
       <div class="back-row">
-        <button type="button" class="back-button" id="backToHome">‹ Volver a juegos</button>
+        <button type="button" class="back-button" id="backToHome" data-i18n="backGames">‹ Volver a juegos</button>
       </div>
 
       <section class="buy-section">
@@ -410,139 +393,180 @@ body.light .pi-name { color:#111; }
           <div class="game-icon">🔥</div>
           <div>
             <h2>Free Fire</h2>
-            <span class="tag"><span class="tag-dot"></span>En línea</span>
+            <span class="tag"><span class="tag-dot"></span><span data-i18n="online">En línea</span></span>
           </div>
         </div>
 
         <div class="id-box">
-          <div class="step-label"><span class="step-num">1</span>ID de jugador</div>
+          <div class="step-label"><span class="step-num">1</span><span data-i18n="step1Label">ID de jugador</span></div>
           <div class="id-row" id="idRow">
-            <input type="text" id="playerIdInput" placeholder="Ej: 8384007639" inputmode="numeric">
-            <button type="button" class="verify-btn" id="verifyBtn">Verificar</button>
+            <input type="text" id="playerIdInput" data-i18n-placeholder="idPlaceholder" placeholder="Ej: 8384007639" inputmode="numeric">
+            <button type="button" class="verify-btn" id="verifyBtn" data-i18n="verifyText">Verificar</button>
           </div>
           <div class="player-info" id="playerInfo"></div>
-          <div class="id-error" id="idError">⚠️ Ingresa un ID válido (solo números).</div>
+          <div class="id-error" id="idError" data-i18n="idErrorMsg">⚠️ Ingresa un ID válido (solo números).</div>
         </div>
-        <div class="step-label"><span class="step-num">2</span>Elige tu paquete</div>
+
+        <div class="step-label"><span class="step-num">2</span><span data-i18n="step2Label">Elige tu paquete</span></div>
         <div class="diamond-list" id="diamondList">
-          <div class="diamond-row" data-name="100 diamantes" data-price="1.00">
+          <div class="diamond-row" data-name="p100" data-price="0.99">
             <div class="pkg-icon"><img src="diamantes.jpg" alt="Diamantes"></div>
-            <div class="row-info"><div class="row-amount">100 Diamantes</div></div>
-            <div class="row-price">$1.00</div>
+            <div class="row-info"><div class="row-amount"><span data-i18n="p100Name">100 Diamantes</span><span class="row-bonus">+10 bonus</span></div></div>
+            <div class="row-price">$0.99</div>
             <div class="row-radio"></div>
           </div>
-          <div class="diamond-row" data-name="310 diamantes bonus" data-price="3.00">
+          <div class="diamond-row" data-name="p310" data-price="2.99">
             <div class="pkg-icon"><img src="diamantes.jpg" alt="Diamantes"></div>
-            <div class="row-info"><div class="row-amount">310 Diamantes<span class="row-bonus">+31 bonus</span></div></div>
-            <div class="row-price">$3.00</div>
+            <div class="row-info"><div class="row-amount"><span data-i18n="p310Name">310 Diamantes</span><span class="row-bonus">+31 bonus</span></div></div>
+            <div class="row-price">$2.99</div>
             <div class="row-radio"></div>
           </div>
-          <div class="diamond-row" data-name="520 diamantes bonus" data-price="5.00">
-            <span class="best-tag">Más popular</span>
+          <div class="diamond-row" data-name="p520" data-price="4.99">
+            <span class="best-tag" data-i18n="mostPopular">Más popular</span>
             <div class="pkg-icon"><img src="diamantes.jpg" alt="Diamantes"></div>
-            <div class="row-info"><div class="row-amount">520 Diamantes<span class="row-bonus">+52 bonus</span></div></div>
-            <div class="row-price">$5.00</div>
+            <div class="row-info"><div class="row-amount"><span data-i18n="p520Name">520 Diamantes</span><span class="row-bonus">+52 bonus</span></div></div>
+            <div class="row-price">$4.99</div>
             <div class="row-radio"></div>
           </div>
-          <div class="diamond-row" data-name="1060 diamantes bonus" data-price="10.00">
+          <div class="diamond-row" data-name="p1060" data-price="9.99">
             <div class="pkg-icon"><img src="diamantes.jpg" alt="Diamantes"></div>
-            <div class="row-info"><div class="row-amount">1,060 Diamantes<span class="row-bonus">+106 bonus</span></div></div>
-            <div class="row-price">$10.00</div>
+            <div class="row-info"><div class="row-amount"><span data-i18n="p1060Name">1,060 Diamantes</span><span class="row-bonus">+106 bonus</span></div></div>
+            <div class="row-price">$9.99</div>
             <div class="row-radio"></div>
           </div>
-          <div class="diamond-row" data-name="2180 diamantes bonus" data-price="20.00">
-            <div class="pkg-icon"><img src="diamantes.jpg" alt="Diamantes"></div>
-            <div class="row-info"><div class="row-amount">2,180 Diamantes<span class="row-bonus">+218 bonus</span></div></div>
-            <div class="row-price">$20.00</div>
-            <div class="row-radio"></div>
-          </div>
-          <div class="diamond-row" data-name="5600 diamantes bonus" data-price="50.00">
-            <div class="pkg-icon"><img src="diamantes.jpg" alt="Diamantes"></div>
-            <div class="row-info"><div class="row-amount">5,600 Diamantes<span class="row-bonus">+560 bonus</span></div></div>
-            <div class="row-price">$50.00</div>
-            <div class="row-radio"></div>
-          </div>
-          <div class="diamond-row" data-name="Tarjeta Semanal" data-price="1.50">
+          <div class="diamond-row" data-name="semanal" data-price="1.99">
             <div class="pkg-icon"><img src="semanal.jpg" alt="Membresía Semanal"></div>
-            <div class="row-info"><div class="row-amount">Tarjeta Semanal<span class="row-bonus">+diamantes diarios</span></div></div>
-            <div class="row-price">$1.50</div>
+            <div class="row-info"><div class="row-amount"><span data-i18n="semanalName">Tarjeta Semanal</span><span class="row-bonus" data-i18n="dailyBonusText">+diamantes diarios</span></div></div>
+            <div class="row-price">$1.99</div>
             <div class="row-radio"></div>
           </div>
-          <div class="diamond-row" data-name="Tarjeta Mensual" data-price="6.00">
+          <div class="diamond-row" data-name="mensual" data-price="9.99">
             <div class="pkg-icon"><img src="mensual.jpg" alt="Membresía Mensual"></div>
-            <div class="row-info"><div class="row-amount">Tarjeta Mensual<span class="row-bonus">+diamantes diarios</span></div></div>
-            <div class="row-price">$6.00</div>
+            <div class="row-info"><div class="row-amount"><span data-i18n="mensualName">Tarjeta Mensual</span><span class="row-bonus" data-i18n="dailyBonusText">+diamantes diarios</span></div></div>
+            <div class="row-price">$9.99</div>
             <div class="row-radio"></div>
           </div>
-          <div class="diamond-row" data-name="Pase Booyah" data-price="4.50">
+          <div class="diamond-row" data-name="booyah" data-price="2.99">
             <div class="pkg-icon"><img src="booyah.jpg" alt="Pase Booyah"></div>
-            <div class="row-info"><div class="row-amount">Pase Booyah<span class="row-bonus">temporada actual</span></div></div>
-            <div class="row-price">$4.50</div>
+            <div class="row-info"><div class="row-amount"><span data-i18n="booyahName">Pase Booyah</span><span class="row-bonus" data-i18n="currentSeasonText">temporada actual</span></div></div>
+            <div class="row-price">$2.99</div>
             <div class="row-radio"></div>
           </div>
         </div>
 
-        <button type="button" class="confirm-purchase-btn" id="confirmPurchaseBtn">Confirmar compra</button>
+        <button type="button" class="confirm-purchase-btn" id="confirmPurchaseBtn" data-i18n="confirmPurchaseText">Confirmar compra</button>
       </section>
     </div>
 
   </main>
-
-  <footer class="site-footer">
-    <div class="footer-inner">
-      <div class="footer-col">
-        <h4>Soporte</h4>
-        <a href="https://wa.me/5351557831?text=Hola%20RIHITO%20SHOP%2C%20necesito%20ayuda" target="_blank" rel="noopener">Contactar por WhatsApp</a>
-      </div>
-      <div class="footer-col">
-        <h4>Legal</h4>
-        <a href="#">Términos y condiciones</a>
-        <a href="#">Política de privacidad</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      © <span id="footerYear"></span> RIHITO SHOP
-    </div>
-  </footer>
 </div>
-
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-box">
-    <h3>Confirmar compra</h3>
-    <p class="modal-sub">Revisa los datos antes de continuar</p>
+    <h3 data-i18n="modalTitle">Confirmar compra</h3>
+    <p class="modal-sub" data-i18n="modalSubText">Revisa los datos antes de continuar</p>
     <div class="modal-summary">
-      <div><span>ID de jugador</span><span id="modalId"></span></div>
-      <div><span>Jugador</span><span id="modalName"></span></div>
-      <div><span>Paquete</span><span id="modalPackage"></span></div>
-      <div><span>Total</span><span id="modalPrice"></span></div>
+      <div><span data-i18n="modalIdLabel">ID de jugador</span><span id="modalId"></span></div>
+      <div><span data-i18n="modalNameLabel">Jugador</span><span id="modalName"></span></div>
+      <div><span data-i18n="modalPackageLabel">Paquete</span><span id="modalPackage"></span></div>
+      <div><span data-i18n="modalTotalLabel">Total</span><span id="modalPrice"></span></div>
     </div>
     <div class="modal-buttons">
-      <button type="button" class="modal-cancel" id="modalCancel">Cancelar</button>
-      <button type="button" class="modal-confirm" id="modalConfirm">Confirmar</button>
+      <button type="button" class="modal-cancel" id="modalCancel" data-i18n="cancelText">Cancelar</button>
+      <button type="button" class="modal-confirm" id="modalConfirm" data-i18n="confirmText">Confirmar</button>
     </div>
   </div>
 </div>
 
 <div class="modal-overlay" id="txModalOverlay">
   <div class="modal-box">
-    <h3>Transacciones</h3>
-    <p class="modal-sub">Historial de tus compras</p>
+    <h3 data-i18n="txTitle">Transacciones</h3>
+    <p class="modal-sub" data-i18n="txSubText">Historial de tus compras</p>
     <div class="tx-list" id="txList">
       <div class="tx-empty">Aún no tienes compras registradas.</div>
     </div>
-    <button type="button" class="close-modal-btn" id="closeTxModal">Cerrar</button>
+    <button type="button" class="close-modal-btn" id="closeTxModal" data-i18n="closeText">Cerrar</button>
   </div>
 </div>
 
 <div id="message"></div>
+
 <script>
+// ---------- IDIOMA ----------
+var idiomaActual = "es";
+
+var textos = {
+  es: {
+    loginSubtitle: "Inicia sesión para continuar", emailPlaceholder: "Correo electrónico", passwordPlaceholder: "Contraseña",
+    loginButtonText: "INICIAR SESIÓN", createAccount: "Crear cuenta", loginErrorMsg: "⚠️ Completa el correo y la contraseña.",
+    configTitle: "⚙️ Configuración", langOption: "Lenguaje", darkModeLabel: "🌙 Modo oscuro",
+    viewProfile: "ver perfil ›", recharge: "RECARGAR", regionLabel: "Región",
+    accountSummary: "Ver resumen de cuenta", transactions: "Transacciones", notifications: "Notificaciones",
+    logout: "Cerrar sesión", logoutMsg: "👋 Sesión cerrada correctamente.",
+    welcomeTitle: "Bienvenido a RIHITO SHOP 👋", welcomeSub: "Compra tus recargas de forma rápida y sencilla.",
+    buyButton: "Comprar", cardRechargesTitle: "Recargas", cardRechargesDesc: "Compra diamantes y otras recargas para tus juegos favoritos.",
+    cardSecureTitle: "Seguro y rápido", cardSecureDesc: "Tu cuenta y tus compras estarán protegidas.",
+    backHome: "‹ Volver al inicio", gamesTitle: "🎮 Juegos disponibles", comingSoonText: "Próximamente<br>más juegos",
+    backGames: "‹ Volver a juegos", online: "En línea", step1Label: "ID de jugador", idPlaceholder: "Ej: 8384007639",
+    verifyText: "Verificar", idErrorMsg: "⚠️ Ingresa un ID válido (solo números).", step2Label: "Elige tu paquete",
+    mostPopular: "Más popular", p100Name: "100 Diamantes", p310Name: "310 Diamantes", p520Name: "520 Diamantes",
+    p1060Name: "1,060 Diamantes", semanalName: "Tarjeta Semanal", mensualName: "Tarjeta Mensual", booyahName: "Pase Booyah",
+    dailyBonusText: "+diamantes diarios", currentSeasonText: "temporada actual", confirmPurchaseText: "Confirmar compra",
+    modalTitle: "Confirmar compra", modalSubText: "Revisa los datos antes de continuar", modalIdLabel: "ID de jugador",
+    modalNameLabel: "Jugador", modalPackageLabel: "Paquete", modalTotalLabel: "Total", cancelText: "Cancelar", confirmText: "Confirmar",
+    insufficientCredit: "⚠️ Crédito insuficiente para esta compra.", purchaseSuccess: "✅ Compra realizada para {name} (ID {id})",
+    txTitle: "Transacciones", txSubText: "Historial de tus compras", txEmpty: "Aún no tienes compras registradas.", closeText: "Cerrar",
+    regionCuba: "Cuba", regionMexico: "México", regionEeuu: "Estados Unidos"
+  },
+  en: {
+    loginSubtitle: "Log in to continue", emailPlaceholder: "Email", passwordPlaceholder: "Password",
+    loginButtonText: "LOG IN", createAccount: "Create account", loginErrorMsg: "⚠️ Please fill in email and password.",
+    configTitle: "⚙️ Settings", langOption: "Language", darkModeLabel: "🌙 Dark mode",
+    viewProfile: "view profile ›", recharge: "TOP UP", regionLabel: "Region",
+    accountSummary: "View account summary", transactions: "Transactions", notifications: "Notifications",
+    logout: "Log out", logoutMsg: "👋 Logged out successfully.",
+    welcomeTitle: "Welcome to RIHITO SHOP 👋", welcomeSub: "Buy your top-ups quickly and easily.",
+    buyButton: "Buy", cardRechargesTitle: "Top-ups", cardRechargesDesc: "Buy diamonds and other top-ups for your favorite games.",
+    cardSecureTitle: "Safe and fast", cardSecureDesc: "Your account and purchases will be protected.",
+    backHome: "‹ Back to home", gamesTitle: "🎮 Available games", comingSoonText: "More games<br>coming soon",
+    backGames: "‹ Back to games", online: "Online", step1Label: "Player ID", idPlaceholder: "E.g: 8384007639",
+    verifyText: "Verify", idErrorMsg: "⚠️ Enter a valid ID (numbers only).", step2Label: "Choose your package",
+    mostPopular: "Most popular", p100Name: "100 Diamonds", p310Name: "310 Diamonds", p520Name: "520 Diamonds",
+    p1060Name: "1,060 Diamonds", semanalName: "Weekly Card", mensualName: "Monthly Card", booyahName: "Booyah Pass",
+    dailyBonusText: "+daily diamonds", currentSeasonText: "current season", confirmPurchaseText: "Confirm purchase",
+    modalTitle: "Confirm purchase", modalSubText: "Review the details before continuing", modalIdLabel: "Player ID",
+    modalNameLabel: "Player", modalPackageLabel: "Package", modalTotalLabel: "Total", cancelText: "Cancel", confirmText: "Confirm",
+    insufficientCredit: "⚠️ Insufficient credit for this purchase.", purchaseSuccess: "✅ Purchase completed for {name} (ID {id})",
+    txTitle: "Transactions", txSubText: "Your purchase history", txEmpty: "You don't have any purchases yet.", closeText: "Close",
+    regionCuba: "Cuba", regionMexico: "Mexico", regionEeuu: "United States"
+  }
+};
+
+function aplicarIdioma(lang) {
+  idiomaActual = lang;
+  var t = textos[lang];
+  document.querySelectorAll("[data-i18n]").forEach(function(el) {
+    var key = el.getAttribute("data-i18n");
+    if (t[key] === undefined) return;
+    if (el.hasAttribute("data-i18n-html")) { el.innerHTML = t[key]; }
+    else { el.textContent = t[key]; }
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(function(el) {
+    var key = el.getAttribute("data-i18n-placeholder");
+    if (t[key] !== undefined) el.placeholder = t[key];
+  });
+  document.getElementById("welcomeTitle").innerText = t.welcomeTitle;
+  document.getElementById("welcomeSub").innerText = t.welcomeSub;
+  document.getElementById("gamesTitle").innerText = t.gamesTitle;
+  renderRegiones();
+}
+
 // ---------- LOGIN ----------
 document.getElementById("loginButton").addEventListener("click", function() {
   var email = document.getElementById("email").value.trim();
   var password = document.getElementById("password").value.trim();
   var message = document.getElementById("loginMessage");
   if (email === "" || password === "") {
-    message.innerText = "⚠️ Completa el correo y la contraseña.";
+    message.innerText = textos[idiomaActual].loginErrorMsg;
     return;
   }
   document.getElementById("loginPage").style.display = "none";
@@ -570,13 +594,11 @@ profileButton.addEventListener("click", function(event) {
 document.addEventListener("click", function() {
   sideMenu.classList.remove("show");
   profileMenu.classList.remove("show");
+  document.getElementById("regionOptions").classList.remove("show");
+  document.getElementById("regionArrow").classList.remove("open");
 });
 
 profileMenu.addEventListener("click", function(event) {
-  event.stopPropagation();
-});
-
-document.getElementById("regionSelect").addEventListener("change", function(event) {
   event.stopPropagation();
 });
 
@@ -589,26 +611,6 @@ langToggleBtn.addEventListener("click", function(event) {
   langSubmenu.classList.toggle("show");
 });
 
-var textos = {
-  es: {
-    welcomeTitle: "Bienvenido a RIHITO SHOP 👋",
-    welcomeSub: "Compra tus recargas de forma rápida y sencilla.",
-    gamesTitle: "🎮 Juegos disponibles"
-  },
-  en: {
-    welcomeTitle: "Welcome to RIHITO SHOP 👋",
-    welcomeSub: "Buy your top-ups quickly and easily.",
-    gamesTitle: "🎮 Available games"
-  }
-};
-
-function aplicarIdioma(lang) {
-  var t = textos[lang];
-  document.getElementById("welcomeTitle").innerText = t.welcomeTitle;
-  document.getElementById("welcomeSub").innerText = t.welcomeSub;
-  document.getElementById("gamesTitle").innerText = t.gamesTitle;
-}
-
 document.getElementById("spanishButton").addEventListener("click", function(event) {
   event.stopPropagation();
   aplicarIdioma("es");
@@ -617,6 +619,42 @@ document.getElementById("spanishButton").addEventListener("click", function(even
 document.getElementById("englishButton").addEventListener("click", function(event) {
   event.stopPropagation();
   aplicarIdioma("en");
+});
+
+// ---------- REGIÓN (menú desplegable) ----------
+var regiones = ["cuba", "mexico", "eeuu"];
+var regionActual = "cuba";
+
+function renderRegiones() {
+  var t = textos[idiomaActual];
+  var nombres = { cuba: t.regionCuba, mexico: t.regionMexico, eeuu: t.regionEeuu };
+
+  document.getElementById("regionSelectedText").textContent = nombres[regionActual];
+
+  var opts = document.getElementById("regionOptions");
+  var html = "";
+  regiones.forEach(function(r) {
+    if (r !== regionActual) {
+      html += '<button type="button" class="region-option" data-region="' + r + '">' + nombres[r] + '</button>';
+    }
+  });
+  opts.innerHTML = html;
+
+  document.querySelectorAll(".region-option").forEach(function(btn) {
+    btn.addEventListener("click", function(event) {
+      event.stopPropagation();
+      regionActual = btn.getAttribute("data-region");
+      renderRegiones();
+      opts.classList.remove("show");
+      document.getElementById("regionArrow").classList.remove("open");
+    });
+  });
+}
+
+document.getElementById("regionSelected").addEventListener("click", function(event) {
+  event.stopPropagation();
+  document.getElementById("regionOptions").classList.toggle("show");
+  document.getElementById("regionArrow").classList.toggle("open");
 });
 
 // ---------- MODO OSCURO ----------
@@ -648,8 +686,9 @@ document.getElementById("rechargeBtn").addEventListener("click", function(event)
   var url = "https://wa.me/" + numero + "?text=" + encodeURIComponent(mensaje);
   window.open(url, "_blank");
 });
-
-// ---------- NAVEGACIÓN: INICIO -> JUEGOS ----------
+</script>
+<script>
+// ---------- NAVEGACIÓN ----------
 var homeView = document.getElementById("homeView");
 var gamesView = document.getElementById("gamesView");
 var shopView = document.getElementById("shopView");
@@ -666,7 +705,6 @@ document.getElementById("backFromGames").addEventListener("click", function() {
   window.scrollTo(0, 0);
 });
 
-// ---------- NAVEGACIÓN: JUEGOS <-> TIENDA ----------
 document.getElementById("openFreeFireShop").addEventListener("click", function() {
   gamesView.style.display = "none";
   shopView.style.display = "block";
@@ -704,9 +742,7 @@ var verifiedName = null;
 var selectedPackage = null;
 var selectedPrice = null;
 
-var nombresConocidos = {
-  "8384007639": "RIHITO"
-};
+var nombresConocidos = { "8384007639": "RIHITO" };
 
 verifyBtn.addEventListener("click", function() {
   var id = playerIdInput.value.trim();
@@ -725,7 +761,8 @@ verifyBtn.addEventListener("click", function() {
 
   var nombre = nombresConocidos[id];
   if (!nombre) {
-    nombre = "Jugador" + id.slice(-4);
+    var prefijo = idiomaActual === "en" ? "Player" : "Jugador";
+    nombre = prefijo + id.slice(-4);
   }
 
   verifiedId = id;
@@ -748,7 +785,12 @@ document.querySelectorAll(".diamond-row").forEach(function(row) {
       r.classList.remove("selected");
     });
     row.classList.add("selected");
-    selectedPackage = row.getAttribute("data-name");
+
+    var nameEl = row.querySelector(".row-amount > span:first-child");
+    var bonusEl = row.querySelector(".row-bonus");
+    selectedPackage = nameEl ? nameEl.textContent.trim() : "";
+    if (bonusEl) selectedPackage += " " + bonusEl.textContent.trim();
+
     selectedPrice = parseFloat(row.getAttribute("data-price"));
     checkFormComplete();
   });
@@ -810,7 +852,7 @@ document.getElementById("modalConfirm").addEventListener("click", function() {
 
   if (creditoActual < selectedPrice) {
     modalOverlay.classList.remove("show");
-    mostrarMensaje("⚠️ Crédito insuficiente para esta compra.");
+    mostrarMensaje(textos[idiomaActual].insufficientCredit);
     return;
   }
 
@@ -824,7 +866,7 @@ document.getElementById("modalConfirm").addEventListener("click", function() {
   });
 
   modalOverlay.classList.remove("show");
-  mostrarMensaje("✅ Compra realizada para " + verifiedName + " (ID " + verifiedId + ")");
+  mostrarMensaje(textos[idiomaActual].purchaseSuccess.replace("{name}", verifiedName).replace("{id}", verifiedId));
 
   shopView.style.display = "none";
   homeView.style.display = "block";
@@ -842,7 +884,7 @@ transaccionesBtn.addEventListener("click", function(event) {
   profileMenu.classList.remove("show");
 
   if (transacciones.length === 0) {
-    txList.innerHTML = '<div class="tx-empty">Aún no tienes compras registradas.</div>';
+    txList.innerHTML = '<div class="tx-empty">' + textos[idiomaActual].txEmpty + '</div>';
   } else {
     var html = "";
     transacciones.forEach(function(tx) {
@@ -875,15 +917,16 @@ document.getElementById("logoutBtn").addEventListener("click", function(event) {
   homeView.style.display = "block";
   resetShopForm();
 
-  document.getElementById("credit").innerText = "$10.00";
-  document.getElementById("pmCredit").innerText = "$10.00";
+  document.getElementById("credit").innerText = "$0.00";
+  document.getElementById("pmCredit").innerText = "$0.00";
   transacciones = [];
 
-  mostrarMensaje("👋 Sesión cerrada correctamente.");
+  mostrarMensaje(textos[idiomaActual].logoutMsg);
 });
 
-// ---------- FOOTER: AÑO ACTUAL ----------
-document.getElementById("footerYear").innerText = new Date().getFullYear();
+// ---------- INICIALIZAR ----------
+aplicarIdioma("es");
+renderRegiones();
 </script>
 
 </body>
