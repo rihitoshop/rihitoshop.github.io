@@ -30,7 +30,6 @@ input:focus { border-color: var(--blue); }
 
 #app { display: none; min-height: 100vh; flex-direction: column; }
 
-/* ---- HEADER (2 filas: logo/perfil arriba, menú abajo) ---- */
 .header { display: flex; flex-direction: column; gap: 10px; padding: 14px 18px; background: #000; border-bottom: 1px solid var(--blue-dim); position: sticky; top: 0; z-index: 20; }
 .header-top { display: flex; align-items: center; width: 100%; }
 .shop-logo { color: var(--blue); font-size: 20px; font-weight: bold; }
@@ -39,7 +38,6 @@ input:focus { border-color: var(--blue); }
 
 .credit { display:flex; align-items:center; gap:7px; font-size: 13px; color: var(--text); padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; }
 
-/* ---- MONEDA DORADA ESTILO "MILLONARIO" HD ---- */
 .coin-icon {
   position: relative;
   display: inline-flex;
@@ -71,7 +69,6 @@ input:focus { border-color: var(--blue); }
   transform: rotate(-20deg);
 }
 
-/* ---- BOTÓN DE CONFIGURACIÓN (menú), más pequeño y sin bordes ---- */
 .menu-container { position: relative; }
 .menu-button {
   width: 34px;
@@ -141,7 +138,6 @@ input:focus { border-color: var(--blue); }
 
 #gamesView { display:none; }
 
-/* ---- TARJETA DE JUEGO: más pequeña, nombre más grande ---- */
 .store-grid { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 30px; }
 .store-card {
   position: relative;
@@ -174,29 +170,39 @@ input:focus { border-color: var(--blue); }
 .back-button { display: inline-flex; align-items: center; gap: 6px; padding: 10px 15px; border-radius: 10px; background: #000; border: 1px solid var(--line); color: #cfe3e8; font-size: 13px; cursor: pointer; }
 .back-button:hover { border-color: var(--blue); color: var(--blue); }
 
-.buy-section { padding: 24px; border-radius: 20px; border: 1px solid var(--blue-dim); box-shadow: 0 0 30px var(--blue-glow); margin-bottom: 25px; }
+.buy-section { padding: 4px 0; margin-bottom: 25px; }
 .buy-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
 .buy-heading .game-icon { width: 46px; height: 46px; border-radius: 12px; background: linear-gradient(135deg, #ff6a3d, #ffb800); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
 .buy-heading h2 { margin: 0; font-size: 22px; }
-.buy-heading span.tag { display: inline-block; margin-top: 3px; font-size: 11px; color: #8fe9c9; background: rgba(52, 211, 153, .1); border: 1px solid rgba(52, 211, 153, .3); border-radius: 20px; padding: 3px 9px; }
+.buy-heading span.tag { display: inline-flex; align-items:center; gap:6px; margin-top: 5px; font-size: 11px; color: #8fe9c9; background: rgba(52, 211, 153, .1); border: 1px solid rgba(52, 211, 153, .3); border-radius: 20px; padding: 3px 10px 3px 8px; }
+.tag-dot { width:5px; height:5px; border-radius:50%; background:#34d399; flex-shrink:0; }
 .buy-section p.buy-sub { margin: 14px 0 18px; color: #a9c3cc; font-size: 13.5px; }
 
-.id-box { border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 20px; }
-.id-box label { display:block; font-size:12.5px; color: var(--muted); margin-bottom:8px; }
+.step-label { display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:bold; letter-spacing:.5px; text-transform:uppercase; color: var(--muted); margin-bottom:10px; }
+.step-num { width:20px; height:20px; border-radius:6px; background: rgba(0,234,255,.12); color: var(--blue); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; flex-shrink:0; }
+
+.id-box { border:none; padding: 0; margin-bottom: 20px; }
 .id-row { display:flex; gap:10px; }
 .id-row input { flex:1; margin-bottom:0; padding:12px 14px; background:#000; border:1px solid var(--line); border-radius:10px; color:white; font-size:14px; }
 .verify-btn { padding:12px 18px; border:none; border-radius:10px; background: var(--blue); color:#001014; font-weight:bold; font-size:13px; cursor:pointer; white-space:nowrap; }
-.player-info { display:none; margin-top:14px; padding:12px 14px; background:rgba(52,211,153,.06); border:1px solid rgba(52,211,153,.3); border-radius:12px; font-size:13.5px; color:#8fe9c9; }
-.player-info.show { display:block; }
+
+.player-info { display:none; align-items:center; gap:10px; }
+.player-info.show { display:flex; }
+.pi-name-box { flex:1; min-width:0; display:flex; align-items:center; gap:8px; padding:12px 14px; background:#000; border:1px solid rgba(52,211,153,.35); border-radius:10px; color:#eef6fa; font-size:14px; font-weight:bold; }
+.pi-name-box span.pi-name-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pi-check-dot { width:8px; height:8px; border-radius:50%; background:#34d399; flex-shrink:0; }
+.pi-region-badge { padding:12px 16px; border:1px solid rgba(0,234,255,.35); background:rgba(0,234,255,.08); border-radius:10px; color:var(--blue); font-weight:800; font-size:13px; white-space:nowrap; flex-shrink:0; }
+
 .id-error { display:none; margin-top:10px; color:#ff6a6a; font-size:12.5px; }
 .id-error.show { display:block; }
 
 .diamond-list { display:flex; flex-direction:column; gap:10px; opacity:.35; pointer-events:none; transition:.3s; margin-bottom:22px; }
 .diamond-list.enabled { opacity:1; pointer-events:auto; }
-.diamond-row { display:flex; align-items:center; gap:14px; padding:14px 16px; border:1px solid var(--line); border-radius:14px; cursor:pointer; transition:.2s; }
+.diamond-row { position:relative; display:flex; align-items:center; gap:14px; padding:14px 16px; border:1px solid var(--line); border-radius:14px; cursor:pointer; transition:.2s; }
 .diamond-row:hover { border-color: var(--blue-dim); }
 .diamond-row.selected { border-color: var(--blue); background: rgba(0,234,255,.05); }
-.diamond-row .pkg-icon { font-size:22px; }
+.diamond-row .pkg-icon { width:40px; height:40px; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.diamond-row .pkg-icon img { width:100%; height:100%; object-fit:cover; border-radius:8px; }
 .diamond-row .row-info { flex:1; }
 .diamond-row .row-amount { font-weight:bold; font-size:15px; }
 .diamond-row .row-bonus { display:block; font-size:11px; color:#34d399; margin-top:2px; }
@@ -204,6 +210,7 @@ input:focus { border-color: var(--blue); }
 .diamond-row .row-radio { width:20px; height:20px; border-radius:50%; border:2px solid var(--line); flex-shrink:0; position:relative; }
 .diamond-row.selected .row-radio { border-color: var(--blue); }
 .diamond-row.selected .row-radio::after { content:''; position:absolute; top:3px; left:3px; width:10px; height:10px; border-radius:50%; background: var(--blue); }
+.best-tag { position:absolute; top:-9px; right:14px; background: linear-gradient(135deg, #ff6a3d, #ffb800); color:#1a0e00; font-size:10px; font-weight:800; letter-spacing:.4px; padding:3px 9px; border-radius:20px; box-shadow: 0 4px 10px -3px rgba(255,106,61,.55); }
 
 .confirm-purchase-btn { width:100%; padding:15px; border:none; border-radius:12px; background: var(--blue); color:#001014; font-weight:bold; font-size:14.5px; cursor:pointer; opacity:.4; pointer-events:none; transition:.2s; }
 .confirm-purchase-btn.enabled { opacity:1; pointer-events:auto; }
@@ -238,7 +245,6 @@ input:focus { border-color: var(--blue); }
 
 #message { display: none; position: fixed; left: 20px; right: 20px; bottom: 25px; max-width: 450px; margin: auto; padding: 14px; text-align: center; background: #000; border: 1px solid var(--blue); border-radius: 12px; color: white; z-index: 100; box-shadow: 0 0 30px var(--blue-glow); }
 
-/* ---- FOOTER (reducido) ---- */
 .site-footer { margin-top: 30px; padding: 30px 18px 20px; border-top: 1px solid var(--line); background:#000; }
 .footer-inner { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 26px; }
 .footer-col h4 { color: var(--blue); font-size: 14px; margin: 0 0 12px; }
@@ -250,7 +256,7 @@ body.light { background: #f1f4f7; color: #111; }
 body.light .header { background: white; border-color: #dce2e8; }
 body.light .login-box { background: white; }
 body.light .welcome { border-left-color: #0ea5c9; }
-body.light .card, body.light .buy-section, body.light .id-box, body.light .diamond-row, body.light .modal-box, body.light .modal-summary, body.light .side-menu, body.light .profile-menu { background: white; border-color: #dce2e8; box-shadow:none; }
+body.light .card, body.light .diamond-row, body.light .modal-box, body.light .modal-summary, body.light .side-menu, body.light .profile-menu { background: white; border-color: #dce2e8; box-shadow:none; }
 body.light .store-card { border-color: #dce2e8; box-shadow:none; }
 body.light .bottom-cards { border-color: #dce2e8; }
 body.light .credit, body.light .profile-button, body.light .back-button { background: #f5f6f8; color: #222; border-color: #dce2e8; }
@@ -262,6 +268,8 @@ body.light .id-box input, body.light .pm-region select { background:#ffffff; col
 body.light .diamond-row .row-amount { color:#111; }
 body.light .site-footer { background:#f1f4f7; border-color:#dce2e8; }
 body.light .footer-bottom { border-color:#dce2e8; }
+body.light .step-label { color:#66717e; }
+body.light .pi-name { color:#111; }
 
 @media(max-width:600px) {
   .shop-logo { font-size: 17px; }
@@ -290,6 +298,7 @@ body.light .footer-bottom { border-color:#dce2e8; }
     <div id="loginMessage"></div>
   </div>
 </div>
+
 <div id="app">
   <header class="header">
     <div class="header-top">
@@ -390,6 +399,7 @@ body.light .footer-bottom { border-color:#dce2e8; }
         <div class="store-card-empty">Próximamente<br>más juegos</div>
       </div>
     </div>
+
     <div id="shopView">
       <div class="back-row">
         <button type="button" class="back-button" id="backToHome">‹ Volver a juegos</button>
@@ -400,72 +410,72 @@ body.light .footer-bottom { border-color:#dce2e8; }
           <div class="game-icon">🔥</div>
           <div>
             <h2>Free Fire</h2>
-            <span class="tag">Entrega manual · en línea</span>
+            <span class="tag"><span class="tag-dot"></span>En línea</span>
           </div>
         </div>
-        <p class="buy-sub">Ingresa tu ID de jugador, verifícalo y elige tu paquete.</p>
 
         <div class="id-box">
-          <label>🆔 ID de jugador</label>
-          <div class="id-row">
+          <div class="step-label"><span class="step-num">1</span>ID de jugador</div>
+          <div class="id-row" id="idRow">
             <input type="text" id="playerIdInput" placeholder="Ej: 8384007639" inputmode="numeric">
             <button type="button" class="verify-btn" id="verifyBtn">Verificar</button>
           </div>
           <div class="player-info" id="playerInfo"></div>
           <div class="id-error" id="idError">⚠️ Ingresa un ID válido (solo números).</div>
         </div>
-
+        <div class="step-label"><span class="step-num">2</span>Elige tu paquete</div>
         <div class="diamond-list" id="diamondList">
           <div class="diamond-row" data-name="100 diamantes" data-price="1.00">
-            <div class="pkg-icon">💎</div>
+            <div class="pkg-icon"><img src="diamantes.jpg" alt="Diamantes"></div>
             <div class="row-info"><div class="row-amount">100 Diamantes</div></div>
             <div class="row-price">$1.00</div>
             <div class="row-radio"></div>
           </div>
           <div class="diamond-row" data-name="310 diamantes bonus" data-price="3.00">
-            <div class="pkg-icon">💎</div>
+            <div class="pkg-icon"><img src="diamantes.jpg" alt="Diamantes"></div>
             <div class="row-info"><div class="row-amount">310 Diamantes<span class="row-bonus">+31 bonus</span></div></div>
             <div class="row-price">$3.00</div>
             <div class="row-radio"></div>
           </div>
           <div class="diamond-row" data-name="520 diamantes bonus" data-price="5.00">
-            <div class="pkg-icon">💎</div>
+            <span class="best-tag">Más popular</span>
+            <div class="pkg-icon"><img src="diamantes.jpg" alt="Diamantes"></div>
             <div class="row-info"><div class="row-amount">520 Diamantes<span class="row-bonus">+52 bonus</span></div></div>
             <div class="row-price">$5.00</div>
             <div class="row-radio"></div>
           </div>
           <div class="diamond-row" data-name="1060 diamantes bonus" data-price="10.00">
-            <div class="pkg-icon">💎</div>
+            <div class="pkg-icon"><img src="diamantes.jpg" alt="Diamantes"></div>
             <div class="row-info"><div class="row-amount">1,060 Diamantes<span class="row-bonus">+106 bonus</span></div></div>
             <div class="row-price">$10.00</div>
             <div class="row-radio"></div>
           </div>
           <div class="diamond-row" data-name="2180 diamantes bonus" data-price="20.00">
-            <div class="pkg-icon">💎</div>
+            <div class="pkg-icon"><img src="diamantes.jpg" alt="Diamantes"></div>
             <div class="row-info"><div class="row-amount">2,180 Diamantes<span class="row-bonus">+218 bonus</span></div></div>
             <div class="row-price">$20.00</div>
             <div class="row-radio"></div>
           </div>
           <div class="diamond-row" data-name="5600 diamantes bonus" data-price="50.00">
-            <div class="pkg-icon">💎</div>
+            <div class="pkg-icon"><img src="diamantes.jpg" alt="Diamantes"></div>
             <div class="row-info"><div class="row-amount">5,600 Diamantes<span class="row-bonus">+560 bonus</span></div></div>
             <div class="row-price">$50.00</div>
             <div class="row-radio"></div>
           </div>
           <div class="diamond-row" data-name="Tarjeta Semanal" data-price="1.50">
-            <div class="pkg-icon">⭐</div>
+            <div class="pkg-icon"><img src="semanal.jpg" alt="Membresía Semanal"></div>
             <div class="row-info"><div class="row-amount">Tarjeta Semanal<span class="row-bonus">+diamantes diarios</span></div></div>
             <div class="row-price">$1.50</div>
             <div class="row-radio"></div>
           </div>
           <div class="diamond-row" data-name="Tarjeta Mensual" data-price="6.00">
-            <div class="pkg-icon">⭐</div>
+            <div class="pkg-icon"><img src="mensual.jpg" alt="Membresía Mensual"></div>
             <div class="row-info"><div class="row-amount">Tarjeta Mensual<span class="row-bonus">+diamantes diarios</span></div></div>
             <div class="row-price">$6.00</div>
             <div class="row-radio"></div>
           </div>
           <div class="diamond-row" data-name="Pase Booyah" data-price="4.50">
-            <div class="pkg-icon">🎟️</div>
+            <div class="pkg-icon"><img src="booyah.jpg" alt="Pase Booyah"></div>
             <div class="row-info"><div class="row-amount">Pase Booyah<span class="row-bonus">temporada actual</span></div></div>
             <div class="row-price">$4.50</div>
             <div class="row-radio"></div>
@@ -557,19 +567,15 @@ profileButton.addEventListener("click", function(event) {
   sideMenu.classList.remove("show");
 });
 
-// Cierra los menús solo al hacer click fuera de ellos
 document.addEventListener("click", function() {
   sideMenu.classList.remove("show");
   profileMenu.classList.remove("show");
 });
 
-// Evita que cualquier click DENTRO del menú de perfil lo cierre
-// (así la región, recargar, etc. no cierran el panel solos)
 profileMenu.addEventListener("click", function(event) {
   event.stopPropagation();
 });
 
-// El cambio de región tampoco cierra el menú
 document.getElementById("regionSelect").addEventListener("change", function(event) {
   event.stopPropagation();
 });
@@ -687,6 +693,7 @@ function mostrarMensaje(texto) {
 // ---------- VERIFICACIÓN DE ID ----------
 var playerIdInput = document.getElementById("playerIdInput");
 var verifyBtn = document.getElementById("verifyBtn");
+var idRow = document.getElementById("idRow");
 var playerInfo = document.getElementById("playerInfo");
 var idError = document.getElementById("idError");
 var diamondList = document.getElementById("diamondList");
@@ -707,6 +714,7 @@ verifyBtn.addEventListener("click", function() {
   if (id === "" || !/^\d+$/.test(id)) {
     idError.classList.add("show");
     playerInfo.classList.remove("show");
+    idRow.style.display = "flex";
     diamondList.classList.remove("enabled");
     verifiedId = null;
     checkFormComplete();
@@ -723,8 +731,11 @@ verifyBtn.addEventListener("click", function() {
   verifiedId = id;
   verifiedName = nombre;
 
-  playerInfo.innerText = "✅ Jugador encontrado: " + nombre;
+  playerInfo.innerHTML =
+    '<div class="pi-name-box"><span class="pi-check-dot"></span><span class="pi-name-text">' + nombre + '</span></div>' +
+    '<div class="pi-region-badge">NA</div>';
   playerInfo.classList.add("show");
+  idRow.style.display = "none";
   diamondList.classList.add("enabled");
 
   checkFormComplete();
@@ -758,6 +769,7 @@ function resetShopForm() {
   selectedPackage = null;
   selectedPrice = null;
   playerInfo.classList.remove("show");
+  idRow.style.display = "flex";
   idError.classList.remove("show");
   diamondList.classList.remove("enabled");
   confirmPurchaseBtn.classList.remove("enabled");
