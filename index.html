@@ -533,7 +533,9 @@ body.light .header::before, body.light .header::after { opacity: .1; }
       <img src="homeicon.png" alt="Inicio">
     </button>
     <div class="nav-slot"></div>
-    <div class="nav-slot"></div>
+    <button type="button" class="nav-btn" id="navProfileBtn" aria-label="Perfil">
+      <img src="profileicon.png" alt="Perfil">
+    </button>
   </nav>
 </div>
 
@@ -784,8 +786,19 @@ darkModeToggle.addEventListener("change", function() {
   }
 });
 
+function abrirPerfil() {
+  // Aquí se abrirá la vista/función de perfil cuando esté activada.
+  // Cuando actives "ver perfil", agrega aquí el código y ambos botones
+  // (el del menú y el de la barra inferior) la usarán automáticamente.
+}
+
 document.getElementById("viewProfileBtn").addEventListener("click", function(event) {
   event.stopPropagation();
+  abrirPerfil();
+});
+
+document.getElementById("navProfileBtn").addEventListener("click", function() {
+  abrirPerfil();
 });
 
 document.getElementById("rechargeBtn").addEventListener("click", function(event) {
