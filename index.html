@@ -268,7 +268,19 @@ input:focus { border-color: var(--blue); }
 .card h3 { margin: 0 0 7px; font-size: 15px; }
 .card p { margin: 0; color: var(--muted); font-size: 13px; }
 
-#message { display: none; position: fixed; left: 20px; right: 20px; bottom: 25px; max-width: 450px; margin: auto; padding: 14px; text-align: center; background: #000; border: 1px solid var(--blue); border-radius: 12px; color: var(--text); z-index: 100; box-shadow: 0 0 30px var(--blue-glow); }
+#message { display: none; position: fixed; left: 20px; right: 20px; bottom: 90px; max-width: 450px; margin: auto; padding: 14px; text-align: center; background: #000; border: 1px solid var(--blue); border-radius: 12px; color: var(--text); z-index: 100; box-shadow: 0 0 30px var(--blue-glow); }
+
+/* ---------- BARRA DE NAVEGACIÓN INFERIOR ---------- */
+.bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: flex; align-items: center; justify-content: space-evenly; padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); background: #000; border-top: 1px solid var(--blue-dim); box-shadow: 0 -4px 20px rgba(0,0,0,.5); }
+.nav-slot { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: transparent; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.nav-btn { width: 52px; height: 52px; border-radius: 50%; border: none; background: transparent; color: #001014; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px var(--blue-dim), 0 4px 10px rgba(0,0,0,.4); flex-shrink: 0; transition: .2s; overflow: hidden; padding: 0; }
+.nav-btn:hover { opacity: .9; transform: translateY(-1px); }
+.nav-btn:active { transform: scale(.94); }
+.nav-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+.main { padding-bottom: 100px; }
+
+body.light .bottom-nav { background: #ffffff; border-color: #e3e8ee; }
+body.light .nav-slot { border-color: #e3e8ee; }
 
 /* ---------- MODO CLARO ---------- */
 body.light { background: #ffffff; color: #111; }
@@ -513,6 +525,16 @@ body.light .header::before, body.light .header::after { opacity: .1; }
     </div>
 
   </main>
+
+  <nav class="bottom-nav">
+    <div class="nav-slot"></div>
+    <div class="nav-slot"></div>
+    <button type="button" class="nav-btn" id="navHomeBtn" aria-label="Inicio">
+      <img src="homeicon.png" alt="Inicio">
+    </button>
+    <div class="nav-slot"></div>
+    <div class="nav-slot"></div>
+  </nav>
 </div>
 
 <div class="modal-overlay" id="modalOverlay">
@@ -799,6 +821,14 @@ document.getElementById("openFreeFireShop").addEventListener("click", function()
 document.getElementById("backToHome").addEventListener("click", function() {
   shopView.style.display = "none";
   gamesView.style.display = "block";
+  resetShopForm();
+  window.scrollTo(0, 0);
+});
+
+document.getElementById("navHomeBtn").addEventListener("click", function() {
+  shopView.style.display = "none";
+  gamesView.style.display = "none";
+  homeView.style.display = "block";
   resetShopForm();
   window.scrollTo(0, 0);
 });
