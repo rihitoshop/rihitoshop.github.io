@@ -30,23 +30,84 @@ input:focus { border-color: var(--blue); }
 
 #app { display: none; min-height: 100vh; flex-direction: column; }
 
-.header { display: flex; flex-direction: column; gap: 10px; padding: 14px 18px; background: #000; border-bottom: 1px solid var(--blue-dim); position: sticky; top: 0; z-index: 20; }
-.header-top { display: flex; align-items: center; width: 100%; }
-.shop-logo { color: var(--blue); font-size: 20px; font-weight: bold; }
-.header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
-.header-bottom { display: flex; align-items: center; }
+/* ---------- HEADER (una sola fila, estilo HUD con esquinas) ---------- */
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 14px 22px;
+  background: #000;
+  border: 1px solid var(--blue-dim);
+  border-radius: 16px;
+  margin: 12px 14px 0;
+  position: sticky;
+  top: 12px;
+  z-index: 20;
+  overflow: hidden;
+  clip-path: polygon(
+    22px 0, calc(100% - 22px) 0, 100% 22px,
+    100% 100%, 0 100%, 0 22px
+  );
+}
 
-.credit { display:flex; align-items:center; gap:7px; font-size: 13px; color: var(--text); padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; }
+/* patrón hexagonal sutil en las esquinas, se desvanece hacia el centro */
+.header::before, .header::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 220px;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cpath d='M14 0 L28 8 L28 24 L14 32 L0 24 L0 8 Z' fill='none' stroke='%2300eaff' stroke-width='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  opacity: .18;
+  -webkit-mask-image: linear-gradient(to right, black, transparent);
+  mask-image: linear-gradient(to right, black, transparent);
+}
+.header::before { left: 0; }
+.header::after { right: 0; -webkit-mask-image: linear-gradient(to left, black, transparent); mask-image: linear-gradient(to left, black, transparent); }
+
+/* acentos diagonales tipo HUD en las esquinas superiores (cortadas por el clip-path) */
+.corner-accent {
+  position: absolute;
+  width: 40px;
+  height: 2px;
+  background: var(--blue);
+  box-shadow: 0 0 8px var(--blue), 0 0 2px var(--blue);
+  pointer-events: none;
+  z-index: 2;
+}
+.corner-tl { top: 15px; left: -9px; transform: rotate(45deg); transform-origin: left center; }
+.corner-tr { top: 15px; right: -9px; transform: rotate(-45deg); transform-origin: right center; }
+
+.header-top { display: flex; align-items: center; width: 100%; gap: 14px; position: relative; z-index: 3; }
+
+.brand-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-width: 0; }
+.shop-logo { color: #fff; font-size: 21px; font-weight: 800; letter-spacing: .5px; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+.shop-logo .diamond-emoji { filter: drop-shadow(0 0 6px var(--blue)); }
+.shop-logo .shop-word { color: var(--blue); text-shadow: 0 0 12px var(--blue-glow); }
+.shop-tagline { margin-top: 3px; font-size: 10.5px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--blue); opacity: .85; white-space: nowrap; }
+
+.header-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+
+.credit { display:flex; align-items:center; gap:7px; font-size: 16px; font-weight: 700; color: var(--text); padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; white-space: nowrap; }
 
 /* MONEDA */
-.coin-icon { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex-shrink: 0; }
-.coin-icon img { width: 100%; height: 100%; object-fit: contain; display: block; image-rendering: -webkit-optimize-contrast; }
-.coin-icon.big { width: 28px; height: 28px; }
+.coin-icon { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; flex-shrink: 0; }
+.coin-icon img {
+  width: 100%; height: 100%; object-fit: contain; display: block;
+  image-rendering: auto;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: smooth;
+  -ms-interpolation-mode: bicubic;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+.coin-icon.big { width: 44px; height: 44px; }
 
-.menu-container { position: relative; }
-.menu-button { width: 34px; height: 34px; border-radius: 9px; border: none; background: rgba(0,234,255,.08); color: var(--blue); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: .2s; }
+.menu-container { position: relative; flex-shrink: 0; }
+.menu-button { width: 40px; height: 40px; border-radius: 10px; border: none; background: rgba(0,234,255,.08); color: var(--blue); font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: .2s; }
 .menu-button:hover { background: rgba(0,234,255,.16); }
-.side-menu { display: none; position: absolute; top: 46px; left: 0; width: 220px; background: #000; border: 1px solid var(--blue-dim); border-radius: 14px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.6); z-index: 30; }
+.side-menu { display: none; position: fixed; width: 220px; background: #000; border: 1px solid var(--blue-dim); border-radius: 14px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.6); z-index: 50; }
 .side-menu.show { display: block; }
 .menu-title { padding: 10px; color: var(--blue); font-weight: bold; font-size: 14px; border-bottom: 1px solid var(--line); margin-bottom: 5px; }
 .menu-option { width: 100%; padding: 12px; background: transparent; color: white; border: none; border-radius: 9px; text-align: left; cursor: pointer; display:flex; align-items:center; justify-content:space-between; font-size:13.5px; }
@@ -64,16 +125,17 @@ input:focus { border-color: var(--blue); }
 .switch input:checked + .switch-track { background: var(--blue); }
 .switch input:checked + .switch-track::before { transform: translateX(18px); }
 
-.profile-container { position: relative; }
-.profile-button { width: 43px; height: 43px; border-radius: 50%; border: 1px solid var(--blue); background: #000; color: var(--blue); font-size: 19px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.profile-menu { display: none; position: absolute; top: 53px; right: 0; width: 250px; background: #000; border: 1px solid var(--blue-dim); border-radius: 16px; padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.6); z-index: 30; }
+.profile-container { position: relative; flex-shrink: 0; }
+.profile-button { width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--blue); background: #000; color: var(--blue); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; }
+.profile-status-dot { position: absolute; bottom: 1px; right: 1px; width: 11px; height: 11px; border-radius: 50%; background: #22c55e; border: 2px solid #000; box-shadow: 0 0 6px rgba(34,197,94,.7); }
+.profile-menu { display: none; position: fixed; width: 250px; background: #000; border: 1px solid var(--blue-dim); border-radius: 16px; padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.6); z-index: 50; }
 .profile-menu.show { display: block; }
 .pm-head { display:flex; align-items:center; gap:12px; padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:10px; }
 .pm-avatar { width:44px; height:44px; border-radius:50%; border:2px solid var(--blue); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
 .pm-name { font-weight:bold; font-size:14.5px; }
 .pm-view-profile { font-size:11.5px; color: var(--blue); cursor:pointer; margin-top:2px; }
 .pm-credit-row { padding: 10px 2px 4px; }
-.pm-credit-amount { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:bold; color:#ffd166; }
+.pm-credit-amount { display:flex; align-items:center; gap:8px; font-size:19px; font-weight:bold; color:#ffd166; }
 .pm-actions-row { display:flex; gap:8px; padding: 8px 2px 6px; }
 .pm-recharge-btn { flex:1; padding:10px; border-radius:10px; border:1px solid var(--blue); background:transparent; color: var(--blue); font-weight:bold; font-size:12px; cursor:pointer; }
 .pm-recharge-btn:hover { background: rgba(0,234,255,.08); }
@@ -232,10 +294,14 @@ body.light .tx-name { color:#111; }
 body.light .tx-item { border-color:#e3e8ee; }
 body.light .close-modal-btn, body.light .modal-cancel { border-color:#e3e8ee !important; color:#333; }
 body.light .store-card-empty { border-color:#dfe5eb; color:#8a96a3; }
+body.light .shop-logo { color:#111; }
+body.light .header::before, body.light .header::after { opacity: .1; }
 
 @media(max-width:600px) {
-  .shop-logo { font-size: 17px; }
-  .credit { padding: 8px 10px; font-size: 11px; }
+  .header { margin: 8px 8px 0; padding: 10px 12px; }
+  .shop-logo { font-size: 15px; }
+  .shop-tagline { font-size: 8.5px; letter-spacing: 1px; }
+  .credit { padding: 8px 10px; font-size: 14px; }
   .profile-button { width: 40px; height: 40px; }
   .welcome h1 { font-size: 22px; }
   .id-row { flex-direction: column; }
@@ -262,68 +328,75 @@ body.light .store-card-empty { border-color:#dfe5eb; color:#8a96a3; }
 
 <div id="app">
   <header class="header">
+    <span class="corner-accent corner-tl"></span>
+    <span class="corner-accent corner-tr"></span>
     <div class="header-top">
-      <div class="shop-logo">💎 RIHITO SHOP</div>
+      <div class="menu-container">
+        <button type="button" class="menu-button" id="menuButton">☰</button>
+      </div>
+
+      <div class="brand-center">
+        <div class="shop-logo"><span class="diamond-emoji">💎</span> RIHITO <span class="shop-word">SHOP</span></div>
+        <div class="shop-tagline">– – – Tu tienda gamer – – –</div>
+      </div>
+
       <div class="header-right">
         <div class="credit"><span class="coin-icon"><img src="monedask.png" alt="SK"></span><span id="credit">$0.00</span></div>
         <div class="profile-container">
-          <button type="button" class="profile-button" id="profileButton">👤</button>
-          <div class="profile-menu" id="profileMenu">
-            <div class="pm-head">
-              <div class="pm-avatar">👤</div>
-              <div>
-                <div class="pm-name">RIHITO</div>
-                <div class="pm-view-profile" id="viewProfileBtn" data-i18n="viewProfile">ver perfil ›</div>
-              </div>
-            </div>
-            <div class="pm-credit-row">
-              <div class="pm-credit-amount"><span class="coin-icon big"><img src="monedask.png" alt="SK"></span><span id="pmCredit">$0.00</span></div>
-            </div>
-            <div class="pm-actions-row">
-              <button type="button" class="pm-recharge-btn" id="rechargeBtn" data-i18n="recharge">RECARGAR</button>
-              <div class="pm-future-box"></div>
-            </div>
-            <div class="pm-region">
-              <label data-i18n="regionLabel">Región</label>
-              <div class="region-dropdown" id="regionDropdown">
-                <div class="region-selected" id="regionSelected">
-                  <span id="regionSelectedText">Cuba</span>
-                  <span class="region-arrow" id="regionArrow">▾</span>
-                </div>
-                <div class="region-options" id="regionOptions"></div>
-              </div>
-            </div>
-            <div class="pm-divider"></div>
-            <button type="button" class="pm-item" data-i18n="accountSummary">Ver resumen de cuenta</button>
-            <button type="button" class="pm-item" id="transaccionesBtn" data-i18n="transactions">Transacciones</button>
-            <button type="button" class="pm-item" data-i18n="notifications">Notificaciones</button>
-            <div class="pm-divider"></div>
-            <button type="button" class="pm-item pm-logout" id="logoutBtn" data-i18n="logout">Cerrar sesión</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="header-bottom">
-      <div class="menu-container">
-        <button type="button" class="menu-button" id="menuButton">☰</button>
-        <div class="side-menu" id="sideMenu">
-          <div class="menu-title" data-i18n="configTitle">⚙️ Configuración</div>
-          <button type="button" class="menu-option" id="langToggleBtn">🌐 <span data-i18n="langOption">Lenguaje</span> <span>›</span></button>
-          <div class="lang-submenu" id="langSubmenu">
-            <button type="button" id="spanishButton">🇪🇸 Español</button>
-            <button type="button" id="englishButton">🇺🇸 English</button>
-          </div>
-          <div class="dark-row">
-            <span data-i18n="darkModeLabel">🌙 Modo oscuro</span>
-            <label class="switch">
-              <input type="checkbox" id="darkModeToggle">
-              <span class="switch-track"></span>
-            </label>
-          </div>
+          <button type="button" class="profile-button" id="profileButton">👤<span class="profile-status-dot"></span></button>
         </div>
       </div>
     </div>
   </header>
+
+  <div class="side-menu" id="sideMenu">
+    <div class="menu-title" data-i18n="configTitle">⚙️ Configuración</div>
+    <button type="button" class="menu-option" id="langToggleBtn">🌐 <span data-i18n="langOption">Lenguaje</span> <span>›</span></button>
+    <div class="lang-submenu" id="langSubmenu">
+      <button type="button" id="spanishButton">🇪🇸 Español</button>
+      <button type="button" id="englishButton">🇺🇸 English</button>
+    </div>
+    <div class="dark-row">
+      <span data-i18n="darkModeLabel">🌙 Modo oscuro</span>
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle">
+        <span class="switch-track"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="profile-menu" id="profileMenu">
+    <div class="pm-head">
+      <div class="pm-avatar">👤</div>
+      <div>
+        <div class="pm-name">RIHITO</div>
+        <div class="pm-view-profile" id="viewProfileBtn" data-i18n="viewProfile">ver perfil ›</div>
+      </div>
+    </div>
+    <div class="pm-credit-row">
+      <div class="pm-credit-amount"><span class="coin-icon big"><img src="monedask.png" alt="SK"></span><span id="pmCredit">$0.00</span></div>
+    </div>
+    <div class="pm-actions-row">
+      <button type="button" class="pm-recharge-btn" id="rechargeBtn" data-i18n="recharge">RECARGAR</button>
+      <div class="pm-future-box"></div>
+    </div>
+    <div class="pm-region">
+      <label data-i18n="regionLabel">Región</label>
+      <div class="region-dropdown" id="regionDropdown">
+        <div class="region-selected" id="regionSelected">
+          <span id="regionSelectedText">Cuba</span>
+          <span class="region-arrow" id="regionArrow">▾</span>
+        </div>
+        <div class="region-options" id="regionOptions"></div>
+      </div>
+    </div>
+    <div class="pm-divider"></div>
+    <button type="button" class="pm-item" data-i18n="accountSummary">Ver resumen de cuenta</button>
+    <button type="button" class="pm-item" id="transaccionesBtn" data-i18n="transactions">Transacciones</button>
+    <button type="button" class="pm-item" data-i18n="notifications">Notificaciones</button>
+    <div class="pm-divider"></div>
+    <button type="button" class="pm-item pm-logout" id="logoutBtn" data-i18n="logout">Cerrar sesión</button>
+  </div>
 
   <main class="main">
 
@@ -440,6 +513,7 @@ body.light .store-card-empty { border-color:#dfe5eb; color:#8a96a3; }
 
   </main>
 </div>
+
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal-box">
     <h3 data-i18n="modalTitle">Confirmar compra</h3>
@@ -467,11 +541,9 @@ body.light .store-card-empty { border-color:#dfe5eb; color:#8a96a3; }
     <button type="button" class="close-modal-btn" id="closeTxModal" data-i18n="closeText">Cerrar</button>
   </div>
 </div>
-
 <div id="message"></div>
-
 <script>
-// ---------- IDIOMA ----------
+document.addEventListener("DOMContentLoaded", function() {
 var idiomaActual = "es";
 
 var textos = {
@@ -496,7 +568,7 @@ var textos = {
     modalNameLabel: "Jugador", modalPackageLabel: "Paquete", modalTotalLabel: "Total", cancelText: "Cancelar", confirmText: "Confirmar",
     insufficientCredit: "⚠️ Crédito insuficiente para esta compra.", purchaseSuccess: "✅ Compra realizada para {name} (ID {id})",
     txTitle: "Transacciones", txSubText: "Historial de tus compras", txEmpty: "Aún no tienes compras registradas.", closeText: "Cerrar",
-    regionCuba: "Cuba", regionMexico: "México", regionEeuu: "EEUU",
+    regionCuba: "Cuba", regionMexico: "México", regionEeuu: "EEUU", regionNA: "NA",
     salirText: "Salir", usernameLabel: "Nombre de usuario:", idLabel2: "ID de jugador:", regionLabel3: "Región:",
     defaultPlayerName: "Jugador"
   },
@@ -521,7 +593,7 @@ var textos = {
     modalNameLabel: "Player", modalPackageLabel: "Package", modalTotalLabel: "Total", cancelText: "Cancel", confirmText: "Confirm",
     insufficientCredit: "⚠️ Insufficient credit for this purchase.", purchaseSuccess: "✅ Purchase completed for {name} (ID {id})",
     txTitle: "Transactions", txSubText: "Your purchase history", txEmpty: "You don't have any purchases yet.", closeText: "Close",
-    regionCuba: "Cuba", regionMexico: "Mexico", regionEeuu: "USA",
+    regionCuba: "Cuba", regionMexico: "Mexico", regionEeuu: "USA", regionNA: "NA",
     salirText: "Exit", usernameLabel: "Username:", idLabel2: "Player ID:", regionLabel3: "Region:",
     defaultPlayerName: "Player"
   }
@@ -547,7 +619,6 @@ function aplicarIdioma(lang) {
   if (typeof verifiedId !== "undefined" && verifiedId) { renderPlayerCard(); }
 }
 
-// ---------- LOGIN ----------
 document.getElementById("loginButton").addEventListener("click", function() {
   var email = document.getElementById("email").value.trim();
   var password = document.getElementById("password").value.trim();
@@ -564,22 +635,48 @@ document.getElementById("loginButton").addEventListener("click", function() {
   document.getElementById("app").style.display = "flex";
 });
 
-// ---------- MENÚS ----------
 var menuButton = document.getElementById("menuButton");
 var sideMenu = document.getElementById("sideMenu");
 var profileButton = document.getElementById("profileButton");
 var profileMenu = document.getElementById("profileMenu");
 
+function posicionarMenu(menuEl, buttonEl, align) {
+  var rect = buttonEl.getBoundingClientRect();
+  menuEl.style.top = (rect.bottom + 8) + "px";
+  if (align === "right") {
+    var right = window.innerWidth - rect.right;
+    if (right < 10) right = 10;
+    menuEl.style.right = right + "px";
+    menuEl.style.left = "auto";
+  } else {
+    var left = rect.left;
+    var maxLeft = window.innerWidth - menuEl.offsetWidth - 10;
+    if (left > maxLeft) left = Math.max(10, maxLeft);
+    menuEl.style.left = left + "px";
+    menuEl.style.right = "auto";
+  }
+}
+
 menuButton.addEventListener("click", function(event) {
   event.stopPropagation();
-  sideMenu.classList.toggle("show");
+  var abrir = !sideMenu.classList.contains("show");
+  sideMenu.classList.remove("show");
   profileMenu.classList.remove("show");
+  if (abrir) {
+    sideMenu.classList.add("show");
+    posicionarMenu(sideMenu, menuButton, "left");
+  }
 });
 
 profileButton.addEventListener("click", function(event) {
   event.stopPropagation();
-  profileMenu.classList.toggle("show");
+  var abrir = !profileMenu.classList.contains("show");
   sideMenu.classList.remove("show");
+  profileMenu.classList.remove("show");
+  if (abrir) {
+    profileMenu.classList.add("show");
+    posicionarMenu(profileMenu, profileButton, "right");
+  }
 });
 
 document.addEventListener("click", function() {
@@ -593,7 +690,6 @@ profileMenu.addEventListener("click", function(event) {
   event.stopPropagation();
 });
 
-// ---------- SUBMENÚ DE LENGUAJE ----------
 var langToggleBtn = document.getElementById("langToggleBtn");
 var langSubmenu = document.getElementById("langSubmenu");
 
@@ -612,12 +708,8 @@ document.getElementById("englishButton").addEventListener("click", function(even
   aplicarIdioma("en");
 });
 
-// ---------- REGIÓN (menú desplegable) ----------
-// detectarRegion(): hoy devuelve "cuba" por defecto.
-// En el futuro, aquí se conecta la API que detecte la región real del jugador
-// y debe devolver únicamente "cuba", "mexico" o "eeuu".
 function detectarRegion() {
-  return "cuba"; // <-- reemplazar por el resultado de la API cuando esté lista
+  return "cuba";
 }
 
 var regiones = ["cuba", "mexico", "eeuu"];
@@ -656,7 +748,6 @@ document.getElementById("regionSelected").addEventListener("click", function(eve
   document.getElementById("regionArrow").classList.toggle("open");
 });
 
-// ---------- MODO OSCURO ----------
 var darkModeToggle = document.getElementById("darkModeToggle");
 darkModeToggle.checked = true;
 
@@ -672,12 +763,10 @@ darkModeToggle.addEventListener("change", function() {
   }
 });
 
-// ---------- VER PERFIL ----------
 document.getElementById("viewProfileBtn").addEventListener("click", function(event) {
   event.stopPropagation();
 });
 
-// ---------- RECARGAR -> WHATSAPP ----------
 document.getElementById("rechargeBtn").addEventListener("click", function(event) {
   event.stopPropagation();
   var numero = "5351557831";
@@ -685,9 +774,7 @@ document.getElementById("rechargeBtn").addEventListener("click", function(event)
   var url = "https://wa.me/" + numero + "?text=" + encodeURIComponent(mensaje);
   window.open(url, "_blank");
 });
-</script>
-<script>
-// ---------- NAVEGACIÓN ----------
+
 var homeView = document.getElementById("homeView");
 var gamesView = document.getElementById("gamesView");
 var shopView = document.getElementById("shopView");
@@ -717,7 +804,6 @@ document.getElementById("backToHome").addEventListener("click", function() {
   window.scrollTo(0, 0);
 });
 
-// ---------- MENSAJES ----------
 var messageBox = document.getElementById("message");
 function mostrarMensaje(texto) {
   messageBox.innerText = texto;
@@ -727,7 +813,6 @@ function mostrarMensaje(texto) {
   }, 2500);
 }
 
-// ---------- VERIFICACIÓN DE ID ----------
 var playerIdInput = document.getElementById("playerIdInput");
 var verifyBtn = document.getElementById("verifyBtn");
 var idRow = document.getElementById("idRow");
@@ -749,7 +834,17 @@ function getRegionName() {
   return nombres[regionActual];
 }
 
-// ---------- TARJETA DE JUGADOR VERIFICADO ----------
+function detectarRegionId(id) {
+  return "NA";
+}
+
+function getIdRegionName(id) {
+  var t = textos[idiomaActual];
+  var codigo = detectarRegionId(id);
+  var nombres = { NA: t.regionNA, EEUU: t.regionEeuu };
+  return nombres[codigo] || t.regionNA;
+}
+
 function renderPlayerCard() {
   var t = textos[idiomaActual];
   playerInfo.innerHTML =
@@ -764,7 +859,7 @@ function renderPlayerCard() {
         '</div>' +
         '<div class="player-card-right">' +
           '<button type="button" class="pi-exit-btn" id="playerExitBtn">⇄ ' + t.salirText + '</button>' +
-          '<div class="pi-region-badge">' + getRegionName() + '</div>' +
+          '<div class="pi-region-badge">' + getIdRegionName(verifiedId) + '</div>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -806,7 +901,6 @@ verifyBtn.addEventListener("click", function() {
   checkFormComplete();
 });
 
-// ---------- SELECCIÓN DE PAQUETE ----------
 document.querySelectorAll(".diamond-row").forEach(function(row) {
   row.addEventListener("click", function() {
     document.querySelectorAll(".diamond-row").forEach(function(r) {
@@ -849,7 +943,6 @@ function resetShopForm() {
   });
 }
 
-// ---------- MODAL DE CONFIRMACIÓN DE COMPRA ----------
 var modalOverlay = document.getElementById("modalOverlay");
 var modalId = document.getElementById("modalId");
 var modalName = document.getElementById("modalName");
@@ -871,7 +964,6 @@ document.getElementById("modalCancel").addEventListener("click", function() {
   modalOverlay.classList.remove("show");
 });
 
-// ---------- HISTORIAL DE TRANSACCIONES ----------
 var transacciones = [];
 
 document.getElementById("modalConfirm").addEventListener("click", function() {
@@ -903,7 +995,6 @@ document.getElementById("modalConfirm").addEventListener("click", function() {
   window.scrollTo(0, 0);
 });
 
-// ---------- MODAL DE TRANSACCIONES ----------
 var txModalOverlay = document.getElementById("txModalOverlay");
 var txList = document.getElementById("txList");
 var transaccionesBtn = document.getElementById("transaccionesBtn");
@@ -929,7 +1020,6 @@ document.getElementById("closeTxModal").addEventListener("click", function() {
   txModalOverlay.classList.remove("show");
 });
 
-// ---------- CERRAR SESIÓN ----------
 document.getElementById("logoutBtn").addEventListener("click", function(event) {
   event.stopPropagation();
   profileMenu.classList.remove("show");
@@ -953,10 +1043,9 @@ document.getElementById("logoutBtn").addEventListener("click", function(event) {
   mostrarMensaje(textos[idiomaActual].logoutMsg);
 });
 
-// ---------- INICIALIZAR ----------
 aplicarIdioma("es");
 renderRegiones();
+});
 </script>
-
 </body>
 </html>
