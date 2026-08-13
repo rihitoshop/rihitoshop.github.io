@@ -159,6 +159,9 @@ input:focus { border-color: var(--blue); }
 .pm-logout:hover { color:#ff8a8a; background:#150808; }
 
 .main { flex: 1; max-width: 900px; margin: auto; padding: 35px 18px 70px; width:100%; }
+
+.hero-banner { display:block; width: 100%; height: auto; border-radius: 18px; border: 1px solid var(--blue-dim); box-shadow: 0 0 30px var(--blue-glow); margin: 0 0 26px; }
+
 .welcome { padding: 4px 4px 20px 16px; border-left: 3px solid var(--blue); margin-bottom: 26px; }
 .welcome h1 { margin: 0 0 8px; font-size: 26px; }
 .welcome p { margin: 0; color: var(--muted); }
@@ -401,10 +404,7 @@ body.light .header::before, body.light .header::after { opacity: .1; }
   <main class="main">
 
     <div id="homeView">
-      <section class="welcome">
-        <h1 id="welcomeTitle">Bienvenido a RIHITO SHOP 👋</h1>
-        <p id="welcomeSub">Compra tus recargas de forma rápida y sencilla.</p>
-      </section>
+      <img class="hero-banner" src="rihitobaner.png" alt="RIHITO SHOP - Compra fácil, rápida y segura">
 
       <button type="button" class="buy-cta-main" id="showGamesBtn" data-i18n="buyButton">Comprar</button>
 
@@ -612,8 +612,6 @@ function aplicarIdioma(lang) {
     var key = el.getAttribute("data-i18n-placeholder");
     if (t[key] !== undefined) el.placeholder = t[key];
   });
-  document.getElementById("welcomeTitle").innerText = t.welcomeTitle;
-  document.getElementById("welcomeSub").innerText = t.welcomeSub;
   document.getElementById("gamesTitle").innerText = t.gamesTitle;
   renderRegiones();
   if (typeof verifiedId !== "undefined" && verifiedId) { renderPlayerCard(); }
