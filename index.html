@@ -272,10 +272,12 @@ input:focus { border-color: var(--blue); }
 
 /* ---------- BARRA DE NAVEGACIÓN INFERIOR ---------- */
 .bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: flex; align-items: center; justify-content: space-evenly; padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); background: #000; border-top: 1px solid var(--blue-dim); box-shadow: 0 -4px 20px rgba(0,0,0,.5); }
-.nav-slot { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: transparent; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.nav-btn { width: 52px; height: 52px; border-radius: 50%; border: none; background: transparent; color: #001014; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px var(--blue-dim), 0 4px 10px rgba(0,0,0,.4); flex-shrink: 0; transition: .2s; overflow: hidden; padding: 0; }
-.nav-btn:hover { opacity: .9; transform: translateY(-1px); }
-.nav-btn:active { transform: scale(.94); }
+.nav-slot { width: 38px; height: 38px; border-radius: 12px; border: 1px solid var(--line); background: transparent; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.nav-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: #001014; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 20px var(--blue-dim), 0 4px 10px rgba(0,0,0,.4); flex-shrink: 0; transition: transform .18s ease, box-shadow .18s ease; overflow: hidden; padding: 0; }
+.nav-btn:hover { transform: translateY(-3px); }
+.nav-btn:active { transform: translateY(-2px) scale(.96); }
+.nav-btn.active { transform: translateY(-8px); box-shadow: 0 0 26px var(--blue-glow), 0 6px 14px rgba(0,0,0,.5); }
+.nav-btn.active:hover { transform: translateY(-8px); }
 .nav-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
 .main { padding-bottom: 100px; }
 
@@ -797,7 +799,15 @@ document.getElementById("viewProfileBtn").addEventListener("click", function(eve
   abrirPerfil();
 });
 
+function marcarNavActivo(btn) {
+  document.querySelectorAll(".nav-btn").forEach(function(b) {
+    b.classList.remove("active");
+  });
+  if (btn) btn.classList.add("active");
+}
+
 document.getElementById("navProfileBtn").addEventListener("click", function() {
+  marcarNavActivo(this);
   abrirPerfil();
 });
 
@@ -814,6 +824,7 @@ var gamesView = document.getElementById("gamesView");
 var shopView = document.getElementById("shopView");
 
 document.getElementById("showGamesBtn").addEventListener("click", function() {
+  marcarNavActivo(null);
   homeView.style.display = "none";
   gamesView.style.display = "block";
   window.scrollTo(0, 0);
@@ -822,16 +833,19 @@ document.getElementById("showGamesBtn").addEventListener("click", function() {
 document.getElementById("backFromGames").addEventListener("click", function() {
   gamesView.style.display = "none";
   homeView.style.display = "block";
+  marcarNavActivo(document.getElementById("navHomeBtn"));
   window.scrollTo(0, 0);
 });
 
 document.getElementById("openFreeFireShop").addEventListener("click", function() {
+  marcarNavActivo(null);
   gamesView.style.display = "none";
   shopView.style.display = "block";
   window.scrollTo(0, 0);
 });
 
 document.getElementById("backToHome").addEventListener("click", function() {
+  marcarNavActivo(null);
   shopView.style.display = "none";
   gamesView.style.display = "block";
   resetShopForm();
@@ -839,12 +853,15 @@ document.getElementById("backToHome").addEventListener("click", function() {
 });
 
 document.getElementById("navHomeBtn").addEventListener("click", function() {
+  marcarNavActivo(this);
   shopView.style.display = "none";
   gamesView.style.display = "none";
   homeView.style.display = "block";
   resetShopForm();
   window.scrollTo(0, 0);
 });
+
+document.getElementById("navHomeBtn").classList.add("active");
 
 var messageBox = document.getElementById("message");
 function mostrarMensaje(texto) {
