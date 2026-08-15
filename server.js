@@ -4,9 +4,13 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 
-const REGIONES = ["NA", "SAC", "US", "BR", "IND", "SG", "RU", "ID", "TH", "VN", "ME", "EU", "PK", "CIS", "TW", "BD"];
+// Regiones de Free Fire que cubren Norteamérica y Estados Unidos.
+const REGIONES = ["NA", "US"];
+
+// API pública/comunitaria (no oficial de Garena) que consulta datos de una cuenta por UID.
 const API_BASE = "https://free-ff-api-src-5plp.onrender.com/api/v1/account";
 
+// Consulta una región puntual con un límite de tiempo para no colgar la petición.
 async function consultarRegion(uid, region, timeoutMs) {
   const controller = new AbortController();
   const timer = setTimeout(function () { controller.abort(); }, timeoutMs);
@@ -33,9 +37,10 @@ async function consultarRegion(uid, region, timeoutMs) {
   }
 }
 
+// Prueba todas las regiones en paralelo y devuelve la primera que encuentre al jugador.
 async function buscarJugador(uid) {
   const intentos = REGIONES.map(function (region) {
-    return consultarRegion(uid, region, 4000);
+    return consultarRegion(uid, region, 20000);
   });
 
   const resultados = await Promise.allSettled(intentos);
