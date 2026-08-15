@@ -529,12 +529,16 @@ body.light .header::before, body.light .header::after { opacity: .1; }
   </main>
 
   <nav class="bottom-nav">
-    <div class="nav-slot"></div>
+    <button type="button" class="nav-btn" id="navMenuBtn" aria-label="Menú">
+      <img src="menuicon.png" alt="Menú">
+    </button>
     <div class="nav-slot"></div>
     <button type="button" class="nav-btn" id="navHomeBtn" aria-label="Inicio">
       <img src="homeicon.png" alt="Inicio">
     </button>
-    <div class="nav-slot"></div>
+    <button type="button" class="nav-btn" id="navTxBtn" aria-label="Transacciones">
+      <img src="txicon.png" alt="Transacciones">
+    </button>
     <button type="button" class="nav-btn" id="navProfileBtn" aria-label="Perfil">
       <img src="profileicon.png" alt="Perfil">
     </button>
@@ -684,6 +688,18 @@ function posicionarMenu(menuEl, buttonEl, align) {
 
 menuButton.addEventListener("click", function(event) {
   event.stopPropagation();
+  var abrir = !sideMenu.classList.contains("show");
+  sideMenu.classList.remove("show");
+  profileMenu.classList.remove("show");
+  if (abrir) {
+    sideMenu.classList.add("show");
+    posicionarMenu(sideMenu, menuButton, "left");
+  }
+});
+
+document.getElementById("navMenuBtn").addEventListener("click", function(event) {
+  event.stopPropagation();
+  marcarNavActivo(this);
   var abrir = !sideMenu.classList.contains("show");
   sideMenu.classList.remove("show");
   profileMenu.classList.remove("show");
@@ -1058,10 +1074,7 @@ var txModalOverlay = document.getElementById("txModalOverlay");
 var txList = document.getElementById("txList");
 var transaccionesBtn = document.getElementById("transaccionesBtn");
 
-transaccionesBtn.addEventListener("click", function(event) {
-  event.stopPropagation();
-  profileMenu.classList.remove("show");
-
+function abrirTransacciones() {
   if (transacciones.length === 0) {
     txList.innerHTML = '<div class="tx-empty">' + textos[idiomaActual].txEmpty + '</div>';
   } else {
@@ -1071,8 +1084,18 @@ transaccionesBtn.addEventListener("click", function(event) {
     });
     txList.innerHTML = html;
   }
-
   txModalOverlay.classList.add("show");
+}
+
+document.getElementById("navTxBtn").addEventListener("click", function() {
+  marcarNavActivo(this);
+  abrirTransacciones();
+});
+
+transaccionesBtn.addEventListener("click", function(event) {
+  event.stopPropagation();
+  profileMenu.classList.remove("show");
+  abrirTransacciones();
 });
 
 document.getElementById("closeTxModal").addEventListener("click", function() {
