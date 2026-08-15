@@ -901,26 +901,28 @@ var verifiedName = null;
 var selectedPackage = null;
 var selectedPrice = null;
 
-var nombresConocidos = { "8384007639": "RIHITO" };
+// URL de tu backend real, ya desplegado en Render
+var BACKEND_URL = "https://rihito-shop-backend.onrender.com";
 
-function getRegionName() {
-  var t = textos[idiomaActual];
-  var nombres = { cuba: t.regionCuba, mexico: t.regionMexico, eeuu: t.regionEeuu };
-  return nombres[regionActual];
+var NOMBRES_REGION = {
+  IND: "India", BR: "Brasil", US: "Norteamérica", NA: "Norteamérica",
+  SAC: "Sudamérica", SG: "Sudeste Asiático", RU: "Rusia", ID: "Indonesia",
+  TH: "Tailandia", VN: "Vietnam", ME: "Medio Oriente", EU: "Europa",
+  PK: "Pakistán", CIS: "CEI", TW: "Taiwán", BD: "Bangladés"
+};
+
+function getIdRegionName(codigo) {
+  return NOMBRES_REGION[codigo] || codigo || "—";
 }
 
-function detectarRegionId(id) {
-  return "NA";
+async function consultarJugador(id) {
+  var resp = await fetch(BACKEND_URL + "/api/verificar-id/" + id);
+  if (!resp.ok) return null;
+  var data = await resp.json();
+  return data;
 }
 
-function getIdRegionName(id) {
-  var t = textos[idiomaActual];
-  var codigo = detectarRegionId(id);
-  var nombres = { NA: t.regionNA, EEUU: t.regionEeuu };
-  return nombres[codigo] || t.regionNA;
-}
-
-function renderPlayerCard() {
+function renderPlayerCard(regionCodigo) {
   var t = textos[idiomaActual];
   playerInfo.innerHTML =
     '<div class="player-card">' +
@@ -934,7 +936,7 @@ function renderPlayerCard() {
         '</div>' +
         '<div class="player-card-right">' +
           '<button type="button" class="pi-exit-btn" id="playerExitBtn">⇄ ' + t.salirText + '</button>' +
-          '<div class="pi-region-badge">' + getIdRegionName(verifiedId) + '</div>' +
+          '<div class="pi-region-badge">' + getIdRegionName(regionCodigo) + '</div>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -945,7 +947,7 @@ function renderPlayerCard() {
   });
 }
 
-verifyBtn.addEventListener("click", function() {
+verifyBtn.addEventListener("click", async function() {
   var id = playerIdInput.value.trim();
 
   if (id === "" || !/^\d+$/.test(id)) {
@@ -959,16 +961,34 @@ verifyBtn.addEventListener("click", function() {
   }
 
   idError.classList.remove("show");
+  verifyBtn.disabled = true;
+  var textoOriginalBtn = verifyBtn.innerText;
+  verifyBtn.innerText = "...";
 
-  var nombre = nombresConocidos[id];
-  if (!nombre) {
-    nombre = textos[idiomaActual].defaultPlayerName + id.slice(-4);
+  var jugador = null;
+  try {
+    jugador = await consultarJugador(id);
+  } catch (e) {
+    jugador = null;
+  }
+
+  verifyBtn.disabled = false;
+  verifyBtn.innerText = textoOriginalBtn;
+
+  if (!jugador) {
+    idError.innerText = "⚠️ No se encontró ese ID. Verifícalo e intenta de nuevo.";
+    idError.classList.add("show");
+    playerInfo.classList.remove("show");
+    diamondList.classList.remove("enabled");
+    verifiedId = null;
+    checkFormComplete();
+    return;
   }
 
   verifiedId = id;
-  verifiedName = nombre;
+  verifiedName = jugador.nickname;
 
-  renderPlayerCard();
+  renderPlayerCard(jugador.region);
   playerInfo.classList.add("show");
   idRow.style.display = "none";
   diamondList.classList.add("enabled");
