@@ -917,8 +917,14 @@ function getIdRegionName(codigo) {
 
 async function consultarJugador(id) {
   var resp = await fetch(BACKEND_URL + "/api/verificar-id/" + id);
-  if (!resp.ok) return null;
-  var data = await resp.json();
+  var data = null;
+  try { data = await resp.json(); } catch (e) { data = null; }
+  if (!resp.ok) {
+    var msg = (data && data.error) ? data.error : ("Error HTTP " + resp.status);
+    var err = new Error(msg);
+    err.esErrorApi = true;
+    throw err;
+  }
   return data;
 }
 
@@ -966,17 +972,21 @@ verifyBtn.addEventListener("click", async function() {
   verifyBtn.innerText = "...";
 
   var jugador = null;
+  var mensajeError = "⚠️ No se encontró ese ID. Verifícalo e intenta de nuevo.";
   try {
     jugador = await consultarJugador(id);
   } catch (e) {
     jugador = null;
+    if (e && e.esErrorApi && e.message) {
+      mensajeError = "⚠️ " + e.message;
+    }
   }
 
   verifyBtn.disabled = false;
   verifyBtn.innerText = textoOriginalBtn;
 
   if (!jugador) {
-    idError.innerText = "⚠️ No se encontró ese ID. Verifícalo e intenta de nuevo.";
+    idError.innerText = mensajeError;
     idError.classList.add("show");
     playerInfo.classList.remove("show");
     diamondList.classList.remove("enabled");
