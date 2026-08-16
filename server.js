@@ -4,53 +4,30 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 
-// Regiones de Free Fire que cubren Norteamérica y Estados Unidos.
-const REGIONES = ["NA", "US"];
+// La clave de API vive en una variable de entorno en Render, nunca en este archivo.
+const API_KEY = process.env.GAMESKINBO_API_KEY;
+const API_BASE = "https://api.gameskinbo.com/ff-info/get";
 
-// API pública/comunitaria (no oficial de Garena) que consulta datos de una cuenta por UID.
-const API_BASE = "https://free-ff-api-src-5plp.onrender.com/api/v1/account";
-
-// Consulta una región puntual con un límite de tiempo para no colgar la petición.
-async function consultarRegion(uid, region, timeoutMs) {
-  const controller = new AbortController();
-  const timer = setTimeout(function () { controller.abort(); }, timeoutMs);
-
-  try {
-    const resp = await fetch(API_BASE + "?region=" + region + "&uid=" + uid, {
-      signal: controller.signal
-    });
-    clearTimeout(timer);
-
-    if (!resp.ok) return null;
-
-    const data = await resp.json();
-    if (data && data.basicInfo && data.basicInfo.nickname) {
-      return {
-        nickname: data.basicInfo.nickname,
-        region: data.basicInfo.region || region
-      };
-    }
-    return null;
-  } catch (err) {
-    clearTimeout(timer);
-    return null;
-  }
-}
-
-// Prueba todas las regiones en paralelo y devuelve la primera que encuentre al jugador.
 async function buscarJugador(uid) {
-  const intentos = REGIONES.map(function (region) {
-    return consultarRegion(uid, region, 20000);
+  const resp = await fetch(API_BASE + "?uid=" + uid, {
+    headers: { "x-api-key": API_KEY }
   });
 
-  const resultados = await Promise.allSettled(intentos);
+  if (resp.status === 401) return { tipo: "sin_clave" };
+  if (resp.status === 429) return { tipo: "limite" };
+  if (resp.status === 402) return { tipo: "id_invalido" };
+  if (!resp.ok) return { tipo: "error" };
 
-  for (const r of resultados) {
-    if (r.status === "fulfilled" && r.value) {
-      return r.value;
-    }
+  const data = await resp.json();
+  if (!data || !data.AccountInfo || !data.AccountInfo.AccountName) {
+    return { tipo: "no_encontrado" };
   }
-  return null;
+
+  return {
+    tipo: "ok",
+    nickname: data.AccountInfo.AccountName,
+    region: data.AccountInfo.AccountRegion
+  };
 }
 
 app.get("/api/verificar-id/:uid", async function (req, res) {
@@ -60,13 +37,28 @@ app.get("/api/verificar-id/:uid", async function (req, res) {
     return res.status(400).json({ error: "ID inválido, solo se permiten números." });
   }
 
-  const jugador = await buscarJugador(uid);
-
-  if (!jugador) {
-    return res.status(404).json({ error: "No se encontró ningún jugador con ese ID." });
+  if (!API_KEY) {
+    return res.status(500).json({ error: "Falta configurar la clave de API en el servidor." });
   }
 
-  res.json(jugador);
+  let resultado;
+  try {
+    resultado = await buscarJugador(uid);
+  } catch (e) {
+    return res.status(502).json({ error: "No se pudo contactar al servicio de verificación." });
+  }
+
+  if (resultado.tipo === "ok") {
+    return res.json({ nickname: resultado.nickname, region: resultado.region });
+  }
+  if (resultado.tipo === "limite") {
+    return res.status(429).json({ error: "Se alcanzó el límite mensual de consultas. Intenta más tarde." });
+  }
+  if (resultado.tipo === "sin_clave") {
+    return res.status(500).json({ error: "Clave de API inválida o faltante." });
+  }
+
+  return res.status(404).json({ error: "No se encontró ningún jugador con ese ID." });
 });
 
 app.get("/", function (req, res) {
