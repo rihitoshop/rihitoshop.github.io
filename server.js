@@ -9,6 +9,10 @@ const API_KEY = process.env.HLGAMING_APIKEY;
 const API_BASE = "https://proapis.hlgamingofficial.com/main/games/freefire/account/api";
 
 // Tu tienda solo vende recargas de Norteamérica / Estados Unidos.
+// Una sola consulta con region="na" ya cubre ambas: la API responde con la
+// región real de la cuenta (NA o US) sin necesidad de pedirla aparte. Si el
+// ID es de otra región (Brasil, India, etc.), esta consulta simplemente no
+// encuentra la cuenta — así evitamos gastar consultas de más.
 const REGION = "na";
 
 async function buscarJugador(uid) {
@@ -29,8 +33,6 @@ async function buscarJugador(uid) {
     data = null;
   }
 
-  // La estructura exacta de "data.result" puede variar; probamos las rutas
-  // más probables según la documentación pública de HL Gaming.
   const accountInfo =
     (data && data.result && data.result.AccountInfo) ||
     (data && data.result && data.result.basicInfo) ||
@@ -47,11 +49,11 @@ async function buscarJugador(uid) {
     };
   }
 
-  const mensajeReal =
-    (data && (data.error || (data.result && data.result.error))) ||
-    ("Error HTTP " + resp.status);
+  // Si no se encontró, es casi siempre porque el ID pertenece a otra región
+  // (fuera del clúster NA/US), no porque el ID esté mal escrito.
+  const mensajeReal = "Región no disponible. Esta tienda solo procesa IDs de Norteamérica y Estados Unidos.";
 
-  return { tipo: "error", status: resp.status === 200 ? 400 : resp.status, mensaje: mensajeReal };
+  return { tipo: "error", status: 400, mensaje: mensajeReal };
 }
 
 app.get("/api/verificar-id/:uid", async function (req, res) {

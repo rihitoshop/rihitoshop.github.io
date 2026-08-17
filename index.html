@@ -904,15 +904,10 @@ var selectedPrice = null;
 // URL de tu backend real, ya desplegado en Render
 var BACKEND_URL = "https://rihito-shop-backend.onrender.com";
 
-var NOMBRES_REGION = {
-  IND: "India", BR: "Brasil", US: "Norteamérica", NA: "Norteamérica",
-  SAC: "Sudamérica", SG: "Sudeste Asiático", RU: "Rusia", ID: "Indonesia",
-  TH: "Tailandia", VN: "Vietnam", ME: "Medio Oriente", EU: "Europa",
-  PK: "Pakistán", CIS: "CEI", TW: "Taiwán", BD: "Bangladés"
-};
+var REGIONES_PERMITIDAS = { US: "Estados Unidos", NA: "Norteamérica" };
 
 function getIdRegionName(codigo) {
-  return NOMBRES_REGION[codigo] || codigo || "—";
+  return REGIONES_PERMITIDAS[codigo] || "Región no disponible";
 }
 
 async function consultarJugador(id) {
