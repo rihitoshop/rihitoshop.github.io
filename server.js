@@ -4,15 +4,23 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 
-const API_KEY = process.env.GAMESKINBO_API_KEY;
-const API_BASE = "https://api.gameskinbo.com/ff-info/get";
+const USERUID = process.env.HLGAMING_USERUID;
+const API_KEY = process.env.HLGAMING_APIKEY;
+const API_BASE = "https://proapis.hlgamingofficial.com/main/games/freefire/account/api";
 
-// Intenta una consulta puntual, opcionalmente indicando una región específica.
-async function intentarConsulta(uid, region) {
-  const url = API_BASE + "?uid=" + uid + (region ? "&region=" + region : "");
-  const resp = await fetch(url, {
-    headers: { "x-api-key": API_KEY }
-  });
+// Tu tienda solo vende recargas de Norteamérica / Estados Unidos.
+const REGION = "na";
+
+async function buscarJugador(uid) {
+  const url =
+    API_BASE +
+    "?sectionName=AllData" +
+    "&PlayerUid=" + uid +
+    "&region=" + REGION +
+    "&useruid=" + USERUID +
+    "&api=" + API_KEY;
+
+  const resp = await fetch(url);
 
   let data = null;
   try {
@@ -21,40 +29,29 @@ async function intentarConsulta(uid, region) {
     data = null;
   }
 
-  if (resp.ok && data && data.AccountInfo && data.AccountInfo.AccountName) {
+  // La estructura exacta de "data.result" puede variar; probamos las rutas
+  // más probables según la documentación pública de HL Gaming.
+  const accountInfo =
+    (data && data.result && data.result.AccountInfo) ||
+    (data && data.result && data.result.basicInfo) ||
+    null;
+
+  const nickname =
+    accountInfo && (accountInfo.AccountName || accountInfo.nickname);
+
+  if (resp.ok && nickname) {
     return {
       tipo: "ok",
-      nickname: data.AccountInfo.AccountName,
-      region: data.AccountInfo.AccountRegion
+      nickname: nickname,
+      region: (accountInfo.AccountRegion || REGION)
     };
   }
 
-  const mensajeReal = data && data.error ? data.error : ("Error HTTP " + resp.status);
-  return { tipo: "error", status: resp.status, mensaje: mensajeReal };
-}
+  const mensajeReal =
+    (data && (data.error || (data.result && data.result.error))) ||
+    ("Error HTTP " + resp.status);
 
-// Prueba primero sin región (orden por defecto), y si falla, prueba cada región de
-// Norte/Sudamérica explícitamente antes de rendirse.
-async function buscarJugador(uid) {
-  const primerIntento = await intentarConsulta(uid, null);
-  if (primerIntento.tipo === "ok") return primerIntento;
-
-  // Si fue límite de uso o clave inválida, no tiene caso reintentar con otras regiones.
-  if (primerIntento.status === 429 || primerIntento.status === 401) {
-    return primerIntento;
-  }
-
-  const regionesAmericanas = ["NA", "US", "SAC", "BR"];
-  let ultimoError = primerIntento;
-
-  for (const region of regionesAmericanas) {
-    const intento = await intentarConsulta(uid, region);
-    if (intento.tipo === "ok") return intento;
-    if (intento.status === 429 || intento.status === 401) return intento;
-    ultimoError = intento;
-  }
-
-  return ultimoError;
+  return { tipo: "error", status: resp.status === 200 ? 400 : resp.status, mensaje: mensajeReal };
 }
 
 app.get("/api/verificar-id/:uid", async function (req, res) {
@@ -64,8 +61,8 @@ app.get("/api/verificar-id/:uid", async function (req, res) {
     return res.status(400).json({ error: "ID inválido, solo se permiten números." });
   }
 
-  if (!API_KEY) {
-    return res.status(500).json({ error: "Falta configurar la clave de API en el servidor." });
+  if (!USERUID || !API_KEY) {
+    return res.status(500).json({ error: "Falta configurar las credenciales de HL Gaming en el servidor." });
   }
 
   let resultado;
@@ -87,16 +84,20 @@ app.get("/", function (req, res) {
 });
 
 // Endpoint temporal de depuración: muestra el código HTTP y la respuesta
-// cruda de GameSkinbo, sin interpretar nada. Bórralo cuando ya no lo necesites.
+// cruda de HL Gaming, sin interpretar nada. Bórralo cuando ya no lo necesites.
 app.get("/api/debug/:uid", async function (req, res) {
   const uid = req.params.uid;
-  const region = req.query.region || null;
-  const url = API_BASE + "?uid=" + uid + (region ? "&region=" + region : "");
+  const region = req.query.region || REGION;
+  const url =
+    API_BASE +
+    "?sectionName=AllData" +
+    "&PlayerUid=" + uid +
+    "&region=" + region +
+    "&useruid=" + USERUID +
+    "&api=" + API_KEY;
 
   try {
-    const resp = await fetch(url, {
-      headers: { "x-api-key": API_KEY }
-    });
+    const resp = await fetch(url);
     const textoCrudo = await resp.text();
 
     res.json({
