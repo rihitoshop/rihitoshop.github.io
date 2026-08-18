@@ -984,8 +984,11 @@ verifyBtn.addEventListener("click", async function() {
     idError.innerText = mensajeError;
     idError.classList.add("show");
     playerInfo.classList.remove("show");
+    playerInfo.innerHTML = "";
+    idRow.style.display = "flex";
     diamondList.classList.remove("enabled");
     verifiedId = null;
+    verifiedName = null;
     checkFormComplete();
     return;
   }

@@ -8,12 +8,12 @@ const USERUID = process.env.HLGAMING_USERUID;
 const API_KEY = process.env.HLGAMING_APIKEY;
 const API_BASE = "https://proapis.hlgamingofficial.com/main/games/freefire/account/api";
 
-// Tu tienda solo vende recargas de Norteamérica / Estados Unidos.
-// Una sola consulta con region="na" ya cubre ambas: la API responde con la
-// región real de la cuenta (NA o US) sin necesidad de pedirla aparte. Si el
-// ID es de otra región (Brasil, India, etc.), esta consulta simplemente no
-// encuentra la cuenta — así evitamos gastar consultas de más.
+// Tu tienda solo vende recargas de Norteamérica / Estados Unidos. La API
+// encuentra cualquier ID sin importar la región que le pidamos, así que
+// filtramos aquí: si la región real de la cuenta no es NA o US, la tratamos
+// como si no se hubiera encontrado.
 const REGION = "na";
+const REGIONES_PERMITIDAS = ["NA", "US"];
 
 async function buscarJugador(uid) {
   const url =
@@ -41,17 +41,17 @@ async function buscarJugador(uid) {
   const nickname =
     accountInfo && (accountInfo.AccountName || accountInfo.nickname);
 
-  if (resp.ok && nickname) {
+  const regionReal = accountInfo && accountInfo.AccountRegion;
+
+  if (resp.ok && nickname && REGIONES_PERMITIDAS.includes((regionReal || "").toUpperCase())) {
     return {
       tipo: "ok",
       nickname: nickname,
-      region: (accountInfo.AccountRegion || REGION)
+      region: regionReal
     };
   }
 
-  // Si no se encontró, es casi siempre porque el ID pertenece a otra región
-  // (fuera del clúster NA/US), no porque el ID esté mal escrito.
-  const mensajeReal = "Región no disponible. Esta tienda solo procesa IDs de Norteamérica y Estados Unidos.";
+  const mensajeReal = "Región no disponible";
 
   return { tipo: "error", status: 400, mensaje: mensajeReal };
 }
