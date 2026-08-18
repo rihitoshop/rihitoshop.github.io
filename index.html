@@ -107,15 +107,21 @@ input:focus { border-color: var(--blue); }
 .menu-container { position: relative; flex-shrink: 0; }
 .menu-button { width: 40px; height: 40px; border-radius: 10px; border: none; background: rgba(0,234,255,.08); color: var(--blue); font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: .2s; }
 .menu-button:hover { background: rgba(0,234,255,.16); }
-.side-menu { display: none; position: fixed; width: 220px; background: #000; border: 1px solid var(--blue-dim); border-radius: 14px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.6); z-index: 50; }
+.side-menu { display: none; position: fixed; width: 220px; background: #000; border: 1px solid var(--blue-dim); border-radius: 14px; padding: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.6); z-index: 50; }
+.side-menu .menu-title { margin-bottom: 8px; }
+.side-menu .menu-option { margin-bottom: 2px; }
+.menu-option-left { display: flex; align-items: center; gap: 8px; }
+.menu-arrow { font-size: 15px; opacity: .8; transition: transform .15s ease; }
+.menu-arrow.open { transform: rotate(90deg); }
+.lang-submenu { display: none; flex-direction: column; gap: 3px; padding: 4px 4px 8px 30px; }
+.lang-submenu.show { display: flex; }
+.lang-option { text-align:left; background:transparent; border:1px solid var(--line); color:#cfe3e8; padding:8px 10px; font-size:13px; cursor:pointer; border-radius:8px; }
+.lang-option:hover { border-color: var(--blue-dim); color: var(--blue); }
+.side-menu .dark-row { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 12px; }
 .side-menu.show { display: block; }
 .menu-title { padding: 10px; color: var(--blue); font-weight: bold; font-size: 14px; border-bottom: 1px solid var(--line); margin-bottom: 5px; }
 .menu-option { width: 100%; padding: 12px; background: transparent; color: white; border: none; border-radius: 9px; text-align: left; cursor: pointer; display:flex; align-items:center; justify-content:space-between; font-size:13.5px; }
 .menu-option:hover { background: #0a0f14; }
-.lang-submenu { display: none; flex-direction: column; padding: 4px 4px 4px 18px; }
-.lang-submenu.show { display: flex; }
-.lang-submenu button { text-align:left; background:transparent; border:none; color:#cfe3e8; padding:10px 8px; font-size:13px; cursor:pointer; border-radius:8px; }
-.lang-submenu button:hover { background:#0a0f14; color: var(--blue); }
 .dark-row { display:flex; align-items:center; justify-content:space-between; padding: 10px 12px; }
 .dark-row span { font-size: 13.5px; }
 .switch { position: relative; width: 42px; height: 24px; flex-shrink:0; }
@@ -130,6 +136,21 @@ input:focus { border-color: var(--blue); }
 .profile-status-dot { position: absolute; bottom: 1px; right: 1px; width: 11px; height: 11px; border-radius: 50%; background: #22c55e; border: 2px solid #000; box-shadow: 0 0 6px rgba(34,197,94,.7); }
 .profile-menu { display: none; position: fixed; width: 210px; background: #000; border: 1px solid var(--blue-dim); border-radius: 14px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.6); z-index: 50; }
 .profile-menu.show { display: block; }
+.orders-menu { display: block; visibility: hidden; pointer-events: none; border-radius: 0 14px 14px 0; border-left: none; width: 224px; padding: 12px 10px; transform: translateX(-100%); opacity: 0; transition: transform .15s ease, opacity .15s ease, visibility .15s; }
+.orders-menu.show { visibility: visible; pointer-events: auto; transform: translateX(0); opacity: 1; }
+.orders-item { display: flex; align-items: center; gap: 8px; width: 100%; background: none; border: none; color: inherit; font-size: 16px; padding: 10px 8px; cursor: pointer; text-align: left; }
+.orders-icon { font-size: 14px; display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; }
+.tx-icon { font-size: 18px; }
+.orders-label { flex: 1; font-size: 14px; font-weight: 700; }
+.orders-arrow { font-size: 16px; opacity: .8; transition: transform .15s ease; }
+.orders-arrow.open { transform: rotate(180deg); }
+.orders-options { display: none; flex-direction: column; gap: 3px; margin-top: 4px; }
+.orders-options.show { display: flex; }
+.orders-option { width: 100%; text-align: left; padding: 6px 8px; background: transparent; border: 1px solid var(--line); border-radius: 8px; color: #cfe3e8; font-size: 12px; cursor: pointer; }
+.orders-option:hover { border-color: var(--blue-dim); color: var(--blue); }
+#transaccionesBtn { margin-top: 8px; }
+#controlZoneBtn { margin-bottom: 4px; }
+#soporteBtn { margin-top: 4px; }
 .pm-head { display:flex; align-items:center; gap:10px; padding-bottom:9px; border-bottom:1px solid var(--line); margin-bottom:8px; }
 .pm-avatar { width:36px; height:36px; border-radius:50%; border:2px solid var(--blue); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
 .pm-name { font-weight:bold; font-size:13px; }
@@ -299,9 +320,9 @@ body.light .bottom-cards { border-color: #e3e8ee; }
 body.light .credit, body.light .profile-button, body.light .back-button { background: #f5f6f8; color: #222; border-color: #e3e8ee; }
 body.light .menu-button { background: rgba(14,165,201,.1); color:#0ea5c9; }
 body.light .menu-button:hover { background: rgba(14,165,201,.2); }
-body.light .menu-option, body.light .pm-item, body.light .lang-submenu button, body.light .pm-name { color: #222; }
+body.light .menu-option, body.light .pm-item, body.light .lang-option, body.light .pm-name { color: #222; }
 body.light .card p, body.light .welcome p { color: #66717e; }
-body.light .id-box input, body.light .region-option, body.light .region-selected { background:#ffffff; color:#111; border-color:#c7e9ee; }
+body.light .id-box input, body.light .region-option, body.light .region-selected, body.light .orders-option { background:#ffffff; color:#111; border-color:#c7e9ee; }
 body.light .diamond-row .row-amount { color:#111; }
 body.light .step-label { color:#66717e; }
 body.light input { background:#ffffff; color:#111; }
@@ -350,7 +371,12 @@ body.light .header::before, body.light .header::after { opacity: .1; }
     <span class="corner-accent corner-tr"></span>
     <div class="header-top">
       <div class="menu-container">
-        <button type="button" class="menu-button" id="menuButton">☰</button>
+        <button type="button" class="menu-button" id="menuButton">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
       </div>
 
       <div class="brand-center">
@@ -369,11 +395,16 @@ body.light .header::before, body.light .header::after { opacity: .1; }
 
   <div class="side-menu" id="sideMenu">
     <div class="menu-title" data-i18n="configTitle">⚙️ Configuración</div>
-    <button type="button" class="menu-option" id="langToggleBtn">🌐 <span data-i18n="langOption">Lenguaje</span> <span>›</span></button>
+
+    <button type="button" class="menu-option" id="langToggleBtn">
+      <span class="menu-option-left">🌐 <span id="langOptionLabel" data-i18n="langOption">Lenguaje</span></span>
+      <span class="menu-arrow" id="langArrow">›</span>
+    </button>
     <div class="lang-submenu" id="langSubmenu">
-      <button type="button" id="spanishButton">🇪🇸 Español</button>
-      <button type="button" id="englishButton">🇺🇸 English</button>
+      <button type="button" class="lang-option" id="spanishButton">🇪🇸 Español</button>
+      <button type="button" class="lang-option" id="englishButton">🇺🇸 English</button>
     </div>
+
     <div class="dark-row">
       <span data-i18n="darkModeLabel">🌙 Modo oscuro</span>
       <label class="switch">
@@ -410,11 +441,37 @@ body.light .header::before, body.light .header::after { opacity: .1; }
     </div>
     <div class="pm-divider"></div>
     <button type="button" class="pm-item" data-i18n="accountSummary">Ver resumen de cuenta</button>
-    <button type="button" class="pm-item" id="transaccionesBtn" data-i18n="transactions">Transacciones</button>
     <button type="button" class="pm-item" data-i18n="notifications">Notificaciones</button>
     <div class="pm-divider"></div>
     <button type="button" class="pm-item pm-logout" id="logoutBtn" data-i18n="logout">Cerrar sesión</button>
   </div>
+
+  <div class="profile-menu orders-menu" id="ordersMenu">
+    <button type="button" class="orders-item" id="controlZoneBtn">
+      <span class="orders-icon">🕹️</span>
+      <span class="orders-label">Zona de Control</span>
+    </button>
+    <button type="button" class="orders-item" id="ordersDropdownBtn">
+      <span class="orders-icon">⚔️</span>
+      <span class="orders-label" data-i18n="ordersLabel">Ordenes de recargas</span>
+      <span class="orders-arrow" id="ordersArrow">▾</span>
+    </button>
+    <div class="orders-options" id="ordersOptions">
+      <button type="button" class="orders-option" data-status="todo">Todo</button>
+      <button type="button" class="orders-option" data-status="completado">Completado</button>
+      <button type="button" class="orders-option" data-status="esperando">Esperando envio</button>
+      <button type="button" class="orders-option" data-status="reembolso">Reembolso</button>
+    </div>
+    <button type="button" class="orders-item" id="transaccionesBtn">
+      <span class="orders-icon tx-icon">🗃️</span>
+      <span class="orders-label" data-i18n="transactions">Transacciones</span>
+    </button>
+    <button type="button" class="orders-item" id="soporteBtn">
+      <span class="orders-icon">🧑🏻‍💻</span>
+      <span class="orders-label">Soporte</span>
+    </button>
+  </div>
+
 
   <main class="main">
 
@@ -656,6 +713,10 @@ document.getElementById("loginButton").addEventListener("click", function() {
     message.innerText = textos[idiomaActual].loginErrorMsg;
     return;
   }
+  if (!/^[^\s@]+@gmail\.com$/i.test(email)) {
+    message.innerText = "⚠️ El correo debe terminar en @gmail.com";
+    return;
+  }
   if (password.length < 8) {
     message.innerText = textos[idiomaActual].passwordLengthErrorMsg;
     return;
@@ -668,10 +729,29 @@ var menuButton = document.getElementById("menuButton");
 var sideMenu = document.getElementById("sideMenu");
 var profileButton = document.getElementById("profileButton");
 var profileMenu = document.getElementById("profileMenu");
+var ordersMenu = document.getElementById("ordersMenu");
 
 function posicionarMenu(menuEl, buttonEl, align) {
   var rect = buttonEl.getBoundingClientRect();
   menuEl.style.top = (rect.bottom + 8) + "px";
+  if (align === "right") {
+    var right = window.innerWidth - rect.right;
+    if (right < 10) right = 10;
+    menuEl.style.right = right + "px";
+    menuEl.style.left = "auto";
+  } else {
+    var left = rect.left;
+    var maxLeft = window.innerWidth - menuEl.offsetWidth - 10;
+    if (left > maxLeft) left = Math.max(10, maxLeft);
+    menuEl.style.left = left + "px";
+    menuEl.style.right = "auto";
+  }
+}
+
+function posicionarMenuArriba(menuEl, buttonEl, align) {
+  var rect = buttonEl.getBoundingClientRect();
+  menuEl.style.top = "auto";
+  menuEl.style.bottom = (window.innerHeight - rect.top + 8) + "px";
   if (align === "right") {
     var right = window.innerWidth - rect.right;
     if (right < 10) right = 10;
@@ -691,6 +771,7 @@ menuButton.addEventListener("click", function(event) {
   var abrir = !sideMenu.classList.contains("show");
   sideMenu.classList.remove("show");
   profileMenu.classList.remove("show");
+  ordersMenu.classList.remove("show");
   if (abrir) {
     sideMenu.classList.add("show");
     posicionarMenu(sideMenu, menuButton, "left");
@@ -700,13 +781,37 @@ menuButton.addEventListener("click", function(event) {
 document.getElementById("navMenuBtn").addEventListener("click", function(event) {
   event.stopPropagation();
   marcarNavActivo(this);
-  var abrir = !sideMenu.classList.contains("show");
+  var abrir = !ordersMenu.classList.contains("show");
   sideMenu.classList.remove("show");
   profileMenu.classList.remove("show");
+  ordersMenu.classList.remove("show");
   if (abrir) {
-    sideMenu.classList.add("show");
-    posicionarMenu(sideMenu, menuButton, "left");
+    ordersMenu.classList.add("show");
+    var rectBtn = this.getBoundingClientRect();
+    ordersMenu.style.top = "auto";
+    ordersMenu.style.bottom = (window.innerHeight - rectBtn.top + 4) + "px";
+    ordersMenu.style.left = "0px";
+    ordersMenu.style.right = "auto";
   }
+});
+
+ordersMenu.addEventListener("click", function(event) {
+  event.stopPropagation();
+});
+
+document.getElementById("ordersDropdownBtn").addEventListener("click", function(event) {
+  event.stopPropagation();
+  document.getElementById("ordersOptions").classList.toggle("show");
+  document.getElementById("ordersArrow").classList.toggle("open");
+});
+
+document.querySelectorAll(".orders-option").forEach(function(btn) {
+  btn.addEventListener("click", function(event) {
+    event.stopPropagation();
+    // Por ahora solo cierra el submenú; la lógica de filtrado se agrega después.
+    document.getElementById("ordersOptions").classList.remove("show");
+    document.getElementById("ordersArrow").classList.remove("open");
+  });
 });
 
 profileButton.addEventListener("click", function(event) {
@@ -714,6 +819,7 @@ profileButton.addEventListener("click", function(event) {
   var abrir = !profileMenu.classList.contains("show");
   sideMenu.classList.remove("show");
   profileMenu.classList.remove("show");
+  ordersMenu.classList.remove("show");
   if (abrir) {
     profileMenu.classList.add("show");
     posicionarMenu(profileMenu, profileButton, "right");
@@ -723,8 +829,13 @@ profileButton.addEventListener("click", function(event) {
 document.addEventListener("click", function() {
   sideMenu.classList.remove("show");
   profileMenu.classList.remove("show");
+  ordersMenu.classList.remove("show");
+  document.getElementById("ordersOptions").classList.remove("show");
+  document.getElementById("ordersArrow").classList.remove("open");
   document.getElementById("regionOptions").classList.remove("show");
   document.getElementById("regionArrow").classList.remove("open");
+  document.getElementById("langSubmenu").classList.remove("show");
+  document.getElementById("langArrow").classList.remove("open");
 });
 
 profileMenu.addEventListener("click", function(event) {
@@ -733,21 +844,38 @@ profileMenu.addEventListener("click", function(event) {
 
 var langToggleBtn = document.getElementById("langToggleBtn");
 var langSubmenu = document.getElementById("langSubmenu");
+var langOptionLabel = document.getElementById("langOptionLabel");
+var langArrow = document.getElementById("langArrow");
+
+var nombresIdioma = { es: "Español", en: "English" };
+
+function actualizarEtiquetaIdioma() {
+  langOptionLabel.textContent = nombresIdioma[idiomaActual];
+}
 
 langToggleBtn.addEventListener("click", function(event) {
   event.stopPropagation();
   langSubmenu.classList.toggle("show");
+  langArrow.classList.toggle("open");
 });
 
 document.getElementById("spanishButton").addEventListener("click", function(event) {
   event.stopPropagation();
   aplicarIdioma("es");
+  actualizarEtiquetaIdioma();
+  langSubmenu.classList.remove("show");
+  langArrow.classList.remove("open");
 });
 
 document.getElementById("englishButton").addEventListener("click", function(event) {
   event.stopPropagation();
   aplicarIdioma("en");
+  actualizarEtiquetaIdioma();
+  langSubmenu.classList.remove("show");
+  langArrow.classList.remove("open");
 });
+
+actualizarEtiquetaIdioma();
 
 function detectarRegion() {
   return "cuba";
@@ -878,6 +1006,24 @@ document.getElementById("navHomeBtn").addEventListener("click", function() {
 });
 
 document.getElementById("navHomeBtn").classList.add("active");
+
+document.getElementById("controlZoneBtn").addEventListener("click", function(event) {
+  event.stopPropagation();
+  ordersMenu.classList.remove("show");
+  marcarNavActivo(document.getElementById("navHomeBtn"));
+  shopView.style.display = "none";
+  gamesView.style.display = "none";
+  homeView.style.display = "block";
+  resetShopForm();
+  window.scrollTo(0, 0);
+});
+
+document.getElementById("soporteBtn").addEventListener("click", function(event) {
+  event.stopPropagation();
+  ordersMenu.classList.remove("show");
+  var mensaje = encodeURIComponent("Hola RIHITO SK tengo un problema con la web");
+  window.open("https://wa.me/5351557831?text=" + mensaje, "_blank");
+});
 
 var messageBox = document.getElementById("message");
 function mostrarMensaje(texto) {
@@ -1126,7 +1272,7 @@ document.getElementById("navTxBtn").addEventListener("click", function() {
 
 transaccionesBtn.addEventListener("click", function(event) {
   event.stopPropagation();
-  profileMenu.classList.remove("show");
+  ordersMenu.classList.remove("show");
   abrirTransacciones();
 });
 
@@ -1158,6 +1304,7 @@ document.getElementById("logoutBtn").addEventListener("click", function(event) {
 });
 
 aplicarIdioma("es");
+actualizarEtiquetaIdioma();
 renderRegiones();
 });
 </script>
