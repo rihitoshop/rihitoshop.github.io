@@ -951,7 +951,8 @@ function renderPlayerCard(regionCodigo) {
 verifyBtn.addEventListener("click", async function() {
   var id = playerIdInput.value.trim();
 
-  if (id === "" || !/^\d+$/.test(id)) {
+  if (id === "" || !/^\d+$/.test(id) || id.length < 8) {
+    idError.innerText = "⚠️ ID inválido";
     idError.classList.add("show");
     playerInfo.classList.remove("show");
     idRow.style.display = "flex";
