@@ -989,6 +989,9 @@ verifyBtn.addEventListener("click", async function() {
     diamondList.classList.remove("enabled");
     verifiedId = null;
     verifiedName = null;
+    if (mensajeError.indexOf("Región no disponible") !== -1) {
+      playerIdInput.value = "";
+    }
     checkFormComplete();
     return;
   }
