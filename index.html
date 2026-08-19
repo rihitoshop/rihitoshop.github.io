@@ -487,6 +487,9 @@ body.light .header::before, body.light .header::after { opacity: .1; }
         <svg class="eye-icon" data-target="registerPassword2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
       </button>
     </div>
+    <div class="input-group" id="registerCodeGroup" style="display:none;">
+      <input type="text" id="registerCode" placeholder="Código de 6 dígitos" maxlength="6" inputmode="numeric">
+    </div>
     <div id="registerMessage" style="min-height:18px; font-size:12.5px; color:#ff8080; margin-bottom:10px;"></div>
     <div class="modal-buttons">
       <button type="button" class="modal-cancel" id="registerCancel" data-i18n="cancelText">Cancelar</button>
@@ -501,6 +504,12 @@ body.light .header::before, body.light .header::after { opacity: .1; }
     <p class="modal-sub" data-i18n="forgotSubText">Ingresa tu correo y te enviaremos un enlace</p>
     <div class="input-group">
       <input type="email" id="forgotEmail" data-i18n-placeholder="emailPlaceholder" placeholder="Correo electrónico">
+    </div>
+    <div class="input-group" id="forgotCodeGroup" style="display:none;">
+      <input type="text" id="forgotCode" placeholder="Código de 6 dígitos" maxlength="6" inputmode="numeric">
+    </div>
+    <div class="input-group" id="forgotNewPasswordGroup" style="display:none;">
+      <input type="password" id="forgotNewPassword" placeholder="Nueva contraseña">
     </div>
     <div id="forgotMessage" style="min-height:18px; font-size:12.5px; color:#ff8080; margin-bottom:10px;"></div>
     <div class="modal-buttons">
@@ -775,84 +784,102 @@ body.light .header::before, body.light .header::after { opacity: .1; }
   </div>
 </div>
 <div id="message"></div>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-  import {
-    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-    sendPasswordResetEmail, signOut, onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-  import {
-    getFirestore, doc, setDoc, getDoc, onSnapshot, runTransaction
-  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+<script>
+  var API_URL = "https://rihito-shop-backend.onrender.com";
+  var currentToken = null;
+  var currentEmail = null;
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCglmNSbjs3uW41tvsv8sCHAp6Vwhb-QO0",
-    authDomain: "diamantes-tienda.firebaseapp.com",
-    projectId: "diamantes-tienda",
-    storageBucket: "diamantes-tienda.firebasestorage.app",
-    messagingSenderId: "216380677606",
-    appId: "1:216380677606:web:932a6de7ee9e01d3b88a27",
-    measurementId: "G-EZ2BS9C3C4"
-  };
+  function traducirError(mensaje) {
+    return "⚠️ " + (mensaje || "Ocurrió un error. Intenta de nuevo.");
+  }
 
-  const fbApp = initializeApp(firebaseConfig);
-  const auth = getAuth(fbApp);
-  const db = getFirestore(fbApp);
-  let creditUnsub = null;
-
-  function traducirError(code) {
-    var map = {
-      "auth/invalid-email": "⚠️ El correo no es válido.",
-      "auth/user-not-found": "⚠️ No existe una cuenta con ese correo.",
-      "auth/wrong-password": "⚠️ Contraseña incorrecta.",
-      "auth/invalid-credential": "⚠️ Correo o contraseña incorrectos.",
-      "auth/email-already-in-use": "⚠️ Ya existe una cuenta con ese correo.",
-      "auth/weak-password": "⚠️ La contraseña debe tener al menos 6 caracteres.",
-      "auth/too-many-requests": "⚠️ Demasiados intentos. Intenta más tarde."
-    };
-    return map[code] || "⚠️ Ocurrió un error. Intenta de nuevo.";
+  async function llamarApi(ruta, opciones) {
+    var resp = await fetch(API_URL + ruta, opciones);
+    var data = await resp.json().catch(function() { return {}; });
+    if (!resp.ok) {
+      var err = new Error(data.error || "Error del servidor");
+      err.code = data.error || "error";
+      throw err;
+    }
+    return data;
   }
 
   window.fb = {
-    signUp: async function(email, password) {
-      var cred = await createUserWithEmailAndPassword(auth, email, password);
-      await setDoc(doc(db, "users", cred.user.uid), {
-        email: email,
-        credit: 0
+    // Paso 1 del registro: pide el codigo de 6 digitos al correo
+    requestSignupCode: async function(email, password, password2) {
+      return await llamarApi("/api/signup/request-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email, password: password, confirmPassword: password2 })
       });
-      return cred.user;
+    },
+    // Paso 2 del registro: confirma el codigo y crea la cuenta
+    verifySignupCode: async function(email, code) {
+      var data = await llamarApi("/api/signup/verify-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email, code: code })
+      });
+      currentToken = data.token;
+      currentEmail = data.email;
+      return { email: data.email, balance: data.balance };
     },
     signIn: async function(email, password) {
-      var cred = await signInWithEmailAndPassword(auth, email, password);
-      return cred.user;
+      var data = await llamarApi("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email, password: password })
+      });
+      currentToken = data.token;
+      currentEmail = data.email;
+      return { email: data.email, balance: data.balance };
     },
-    resetPassword: async function(email) {
-      await sendPasswordResetEmail(auth, email);
+    // Paso 1 de "olvide mi contraseña": pide el codigo de 6 digitos al correo
+    requestResetCode: async function(email) {
+      return await llamarApi("/api/forgot-password/request-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email })
+      });
+    },
+    // Paso 2 de "olvide mi contraseña": confirma el codigo y pone la nueva contraseña
+    confirmResetPassword: async function(email, code, newPassword) {
+      return await llamarApi("/api/forgot-password/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email, code: code, newPassword: newPassword })
+      });
     },
     signOutUser: async function() {
-      if (creditUnsub) { creditUnsub(); creditUnsub = null; }
-      await signOut(auth);
+      currentToken = null;
+      currentEmail = null;
     },
     watchCredit: function(uid, callback) {
-      if (creditUnsub) { creditUnsub(); }
-      creditUnsub = onSnapshot(doc(db, "users", uid), function(snap) {
-        if (snap.exists()) { callback(snap.data().credit || 0); }
-        else { callback(0); }
-      });
+      // Consulta el saldo actual una vez, y lo vuelve a consultar cada 15 segundos
+      function consultar() {
+        if (!currentToken) return;
+        fetch(API_URL + "/api/me", { headers: { Authorization: "Bearer " + currentToken } })
+          .then(function(r) { return r.json(); })
+          .then(function(data) { if (typeof data.balance !== "undefined") callback(data.balance); })
+          .catch(function() {});
+      }
+      consultar();
+      if (window._rihitoCreditInterval) clearInterval(window._rihitoCreditInterval);
+      window._rihitoCreditInterval = setInterval(consultar, 15000);
     },
     spendCredit: async function(uid, amount) {
-      return await runTransaction(db, async function(transaction) {
-        var ref = doc(db, "users", uid);
-        var snap = await transaction.get(ref);
-        var actual = snap.exists() ? (snap.data().credit || 0) : 0;
-        if (actual < amount) { throw new Error("insufficient"); }
-        var nuevo = Math.round((actual - amount) * 100) / 100;
-        transaction.update(ref, { credit: nuevo });
-        return nuevo;
+      var data = await llamarApi("/api/spend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + currentToken },
+        body: JSON.stringify({ amount: amount })
       });
+      return data.balance;
     },
     traducirError: traducirError,
-    getCurrentUser: function() { return auth.currentUser; }
+    getCurrentUser: function() {
+      if (!currentToken) return null;
+      return { uid: currentEmail, email: currentEmail };
+    }
   };
 
   window.fbReady = true;
@@ -872,6 +899,10 @@ var textos = {
     confirmPasswordPlaceholder: "Confirmar contraseña",
     forgotTitle: "Recuperar contraseña", forgotSubText: "Ingresa tu correo y te enviaremos un enlace", forgotButtonText: "Enviar",
     noAccountFoundMsg: "No encontramos una cuenta con esos datos.",
+    verificationSentMsg: "Te enviamos un correo de verificación. Ábrelo y da clic en el botón para activar tu cuenta.",
+    emailNotVerifiedMsg: "Tu correo aún no está verificado. Revisa tu bandeja de entrada.",
+    resendVerificationText: "Reenviar correo de verificación",
+    verificationResentMsg: "Correo de verificación reenviado.",
     configTitle: "⚙️ Configuración", langOption: "Lenguaje", darkModeLabel: "🌙 Modo oscuro",
     viewProfile: "ver perfil ›", recharge: "RECARGAR", regionLabel: "Región",
     accountSummary: "Ver resumen de cuenta", transactions: "Transacciones", notifications: "Notificaciones",
@@ -901,6 +932,10 @@ var textos = {
     confirmPasswordPlaceholder: "Confirm password",
     forgotTitle: "Reset password", forgotSubText: "Enter your email and we'll send you a link", forgotButtonText: "Send",
     noAccountFoundMsg: "We couldn't find an account with those details.",
+    verificationSentMsg: "We sent you a verification email. Open it and click the button to activate your account.",
+    emailNotVerifiedMsg: "Your email hasn't been verified yet. Check your inbox.",
+    resendVerificationText: "Resend verification email",
+    verificationResentMsg: "Verification email resent.",
     configTitle: "⚙️ Settings", langOption: "Language", darkModeLabel: "🌙 Dark mode",
     viewProfile: "view profile ›", recharge: "TOP UP", regionLabel: "Region",
     accountSummary: "View account summary", transactions: "Transactions", notifications: "Notifications",
@@ -992,83 +1027,159 @@ document.getElementById("loginButton").addEventListener("click", function() {
     document.getElementById("password").value = "";
     activarCuentaEnApp(user);
   }).catch(function(err) {
-    if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
-      message.innerHTML = '<div class="no-account-hint">😕 ' + textos[idiomaActual].noAccountFoundMsg + '<br><span class="create-account-inline" id="createAccountFromLogin">' + textos[idiomaActual].createAccount + ' →</span></div>';
-      document.getElementById("createAccountFromLogin").addEventListener("click", function() {
-        document.getElementById("registerEmail").value = email;
-        document.getElementById("registerPassword").value = "";
-        document.getElementById("registerPassword2").value = "";
-        document.getElementById("registerMessage").innerText = "";
-        registerModalOverlay.classList.add("show");
-      });
-    } else {
-      message.innerText = window.fb.traducirError(err.code);
-    }
+    message.innerHTML = '<div class="no-account-hint">😕 ' + textos[idiomaActual].noAccountFoundMsg + '<br><span class="create-account-inline" id="createAccountFromLogin">' + textos[idiomaActual].createAccount + ' →</span></div>';
+    document.getElementById("createAccountFromLogin").addEventListener("click", function() {
+      document.getElementById("registerEmail").value = email;
+      document.getElementById("registerPassword").value = "";
+      document.getElementById("registerPassword2").value = "";
+      document.getElementById("registerMessage").innerText = "";
+      registerModalOverlay.classList.add("show");
+    });
   });
 });
 
 var registerModalOverlay = document.getElementById("registerModalOverlay");
-document.querySelector(".create-account").addEventListener("click", function() {
+var registerStep = "form";
+function resetearModalRegistro() {
+  registerStep = "form";
   document.getElementById("registerEmail").value = "";
   document.getElementById("registerPassword").value = "";
   document.getElementById("registerPassword2").value = "";
-  document.getElementById("registerMessage").innerText = "";
+  document.getElementById("registerCode").value = "";
+  document.getElementById("registerCodeGroup").style.display = "none";
+  document.getElementById("registerEmail").disabled = false;
+  document.getElementById("registerPassword").disabled = false;
+  document.getElementById("registerPassword2").disabled = false;
+  document.getElementById("registerMessage").innerHTML = "";
+  document.getElementById("registerConfirm").innerText = textos[idiomaActual].registerButtonText;
+}
+document.querySelector(".create-account").addEventListener("click", function() {
+  resetearModalRegistro();
   registerModalOverlay.classList.add("show");
 });
 document.getElementById("registerCancel").addEventListener("click", function() {
   registerModalOverlay.classList.remove("show");
+  resetearModalRegistro();
 });
 document.getElementById("registerConfirm").addEventListener("click", function() {
   var email = document.getElementById("registerEmail").value.trim();
   var password = document.getElementById("registerPassword").value.trim();
   var password2 = document.getElementById("registerPassword2").value.trim();
+  var code = document.getElementById("registerCode").value.trim();
   var message = document.getElementById("registerMessage");
-  message.innerText = "";
-  if (email === "" || password === "" || password2 === "") {
-    message.innerText = "⚠️ Completa todos los campos.";
-    return;
+  message.innerHTML = "";
+
+  if (registerStep === "form") {
+    if (email === "" || password === "" || password2 === "") {
+      message.innerText = "⚠️ Completa todos los campos.";
+      return;
+    }
+    if (password !== password2) {
+      message.innerText = "⚠️ Las contraseñas no coinciden.";
+      return;
+    }
+    if (password.length < 6) {
+      message.innerText = "⚠️ La contraseña debe tener al menos 6 caracteres.";
+      return;
+    }
+    window.fb.requestSignupCode(email, password, password2).then(function() {
+      message.style.color = "#7fdc8f";
+      message.innerText = "✅ Te enviamos un código de 6 dígitos a tu correo.";
+      document.getElementById("registerCodeGroup").style.display = "";
+      document.getElementById("registerEmail").disabled = true;
+      document.getElementById("registerPassword").disabled = true;
+      document.getElementById("registerPassword2").disabled = true;
+      document.getElementById("registerConfirm").innerText = "Verificar código";
+      registerStep = "code";
+    }).catch(function(err) {
+      message.style.color = "#ff8080";
+      message.innerText = window.fb.traducirError(err.code);
+    });
+  } else {
+    if (code === "") {
+      message.innerText = "⚠️ Escribe el código que te llegó al correo.";
+      return;
+    }
+    window.fb.verifySignupCode(email, code).then(function(user) {
+      registerModalOverlay.classList.remove("show");
+      resetearModalRegistro();
+      activarCuentaEnApp(user);
+    }).catch(function(err) {
+      message.style.color = "#ff8080";
+      message.innerText = window.fb.traducirError(err.code);
+    });
   }
-  if (password !== password2) {
-    message.innerText = "⚠️ Las contraseñas no coinciden.";
-    return;
-  }
-  if (password.length < 6) {
-    message.innerText = "⚠️ La contraseña debe tener al menos 6 caracteres.";
-    return;
-  }
-  window.fb.signUp(email, password).then(function(user) {
-    registerModalOverlay.classList.remove("show");
-    activarCuentaEnApp(user);
-  }).catch(function(err) {
-    message.innerText = window.fb.traducirError(err.code);
-  });
 });
 
 var forgotModalOverlay = document.getElementById("forgotModalOverlay");
+var forgotStep = "email";
+function resetearModalForgot() {
+  forgotStep = "email";
+  document.getElementById("forgotCode").value = "";
+  document.getElementById("forgotNewPassword").value = "";
+  document.getElementById("forgotCodeGroup").style.display = "none";
+  document.getElementById("forgotNewPasswordGroup").style.display = "none";
+  document.getElementById("forgotEmail").disabled = false;
+  document.getElementById("forgotConfirm").innerText = textos[idiomaActual].forgotButtonText;
+}
 document.querySelector(".forgot-pass").addEventListener("click", function() {
   document.getElementById("forgotEmail").value = document.getElementById("email").value.trim();
   document.getElementById("forgotMessage").innerText = "";
   document.getElementById("forgotMessage").style.color = "#ff8080";
+  resetearModalForgot();
   forgotModalOverlay.classList.add("show");
 });
 document.getElementById("forgotCancel").addEventListener("click", function() {
   forgotModalOverlay.classList.remove("show");
+  resetearModalForgot();
 });
 document.getElementById("forgotConfirm").addEventListener("click", function() {
   var email = document.getElementById("forgotEmail").value.trim();
+  var code = document.getElementById("forgotCode").value.trim();
+  var newPassword = document.getElementById("forgotNewPassword").value.trim();
   var message = document.getElementById("forgotMessage");
-  if (email === "") {
-    message.style.color = "#ff8080";
-    message.innerText = "⚠️ Escribe tu correo.";
-    return;
+
+  if (forgotStep === "email") {
+    if (email === "") {
+      message.style.color = "#ff8080";
+      message.innerText = "⚠️ Escribe tu correo.";
+      return;
+    }
+    window.fb.requestResetCode(email).then(function() {
+      message.style.color = "#7fdc8f";
+      message.innerText = "✅ Si el correo existe, te enviamos un código de 6 dígitos.";
+      document.getElementById("forgotCodeGroup").style.display = "";
+      document.getElementById("forgotNewPasswordGroup").style.display = "";
+      document.getElementById("forgotEmail").disabled = true;
+      document.getElementById("forgotConfirm").innerText = "Cambiar contraseña";
+      forgotStep = "code";
+    }).catch(function(err) {
+      message.style.color = "#ff8080";
+      message.innerText = window.fb.traducirError(err.code);
+    });
+  } else {
+    if (code === "" || newPassword === "") {
+      message.style.color = "#ff8080";
+      message.innerText = "⚠️ Completa el código y la nueva contraseña.";
+      return;
+    }
+    if (newPassword.length < 6) {
+      message.style.color = "#ff8080";
+      message.innerText = "⚠️ La contraseña debe tener al menos 6 caracteres.";
+      return;
+    }
+    window.fb.confirmResetPassword(email, code, newPassword).then(function() {
+      message.style.color = "#7fdc8f";
+      message.innerText = "✅ Contraseña actualizada. Ya puedes iniciar sesión.";
+      setTimeout(function() {
+        forgotModalOverlay.classList.remove("show");
+        resetearModalForgot();
+      }, 1800);
+    }).catch(function(err) {
+      message.style.color = "#ff8080";
+      message.innerText = window.fb.traducirError(err.code);
+    });
   }
-  window.fb.resetPassword(email).then(function() {
-    message.style.color = "#7fdc8f";
-    message.innerText = "✅ Enlace enviado, revisa tu correo.";
-  }).catch(function(err) {
-    message.style.color = "#ff8080";
-    message.innerText = window.fb.traducirError(err.code);
-  });
 });
 
 var menuButton = document.getElementById("menuButton");
