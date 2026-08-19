@@ -85,6 +85,9 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,150,255,.1
 .create-account-row { font-size: 13px; color: var(--muted); }
 .create-account { display: inline-block; color: var(--blue); font-size: 13px; cursor: pointer; font-weight: 700; }
 #loginMessage { margin-top: 15px; color: var(--blue); font-size: 13px; }
+.no-account-hint { background: rgba(0,150,255,.08); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: 13px; color: #cfe3e8; line-height: 1.5; text-align: left; }
+.create-account-inline { display: inline-block; margin-top: 6px; color: var(--blue); font-weight: bold; cursor: pointer; }
+.create-account-inline:hover { text-decoration: underline; }
 
 #app { display: none; min-height: 100vh; flex-direction: column; }
 
@@ -465,6 +468,48 @@ body.light .header::before, body.light .header::after { opacity: .1; }
   </div>
 </div>
 
+<div class="modal-overlay" id="registerModalOverlay">
+  <div class="modal-box">
+    <h3 data-i18n="registerTitle">Crear cuenta</h3>
+    <p class="modal-sub" data-i18n="registerSubText">Regístrate para guardar tu crédito</p>
+    <div class="input-group">
+      <input type="email" id="registerEmail" data-i18n-placeholder="emailPlaceholder" placeholder="Correo electrónico">
+    </div>
+    <div class="input-group">
+      <input type="password" id="registerPassword" class="has-toggle" data-i18n-placeholder="passwordPlaceholder" placeholder="Contraseña">
+      <button type="button" class="toggle-eye" id="toggleRegisterPassword" aria-label="Mostrar contraseña">
+        <svg class="eye-icon" data-target="registerPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <div class="input-group">
+      <input type="password" id="registerPassword2" class="has-toggle" data-i18n-placeholder="confirmPasswordPlaceholder" placeholder="Confirmar contraseña">
+      <button type="button" class="toggle-eye" id="toggleRegisterPassword2" aria-label="Mostrar contraseña">
+        <svg class="eye-icon" data-target="registerPassword2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <div id="registerMessage" style="min-height:18px; font-size:12.5px; color:#ff8080; margin-bottom:10px;"></div>
+    <div class="modal-buttons">
+      <button type="button" class="modal-cancel" id="registerCancel" data-i18n="cancelText">Cancelar</button>
+      <button type="button" class="modal-confirm" id="registerConfirm" data-i18n="registerButtonText">Crear cuenta</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="forgotModalOverlay">
+  <div class="modal-box">
+    <h3 data-i18n="forgotTitle">Recuperar contraseña</h3>
+    <p class="modal-sub" data-i18n="forgotSubText">Ingresa tu correo y te enviaremos un enlace</p>
+    <div class="input-group">
+      <input type="email" id="forgotEmail" data-i18n-placeholder="emailPlaceholder" placeholder="Correo electrónico">
+    </div>
+    <div id="forgotMessage" style="min-height:18px; font-size:12.5px; color:#ff8080; margin-bottom:10px;"></div>
+    <div class="modal-buttons">
+      <button type="button" class="modal-cancel" id="forgotCancel" data-i18n="cancelText">Cancelar</button>
+      <button type="button" class="modal-confirm" id="forgotConfirm" data-i18n="forgotButtonText">Enviar</button>
+    </div>
+  </div>
+</div>
+
 <div id="app">
   <header class="header">
     <span class="corner-accent corner-tl"></span>
@@ -730,6 +775,90 @@ body.light .header::before, body.light .header::after { opacity: .1; }
   </div>
 </div>
 <div id="message"></div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+  import {
+    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    sendPasswordResetEmail, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+  import {
+    getFirestore, doc, setDoc, getDoc, onSnapshot, runTransaction
+  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCglmNSbjs3uW41tvsv8sCHAp6Vwhb-QO0",
+    authDomain: "diamantes-tienda.firebaseapp.com",
+    projectId: "diamantes-tienda",
+    storageBucket: "diamantes-tienda.firebasestorage.app",
+    messagingSenderId: "216380677606",
+    appId: "1:216380677606:web:932a6de7ee9e01d3b88a27",
+    measurementId: "G-EZ2BS9C3C4"
+  };
+
+  const fbApp = initializeApp(firebaseConfig);
+  const auth = getAuth(fbApp);
+  const db = getFirestore(fbApp);
+  let creditUnsub = null;
+
+  function traducirError(code) {
+    var map = {
+      "auth/invalid-email": "⚠️ El correo no es válido.",
+      "auth/user-not-found": "⚠️ No existe una cuenta con ese correo.",
+      "auth/wrong-password": "⚠️ Contraseña incorrecta.",
+      "auth/invalid-credential": "⚠️ Correo o contraseña incorrectos.",
+      "auth/email-already-in-use": "⚠️ Ya existe una cuenta con ese correo.",
+      "auth/weak-password": "⚠️ La contraseña debe tener al menos 6 caracteres.",
+      "auth/too-many-requests": "⚠️ Demasiados intentos. Intenta más tarde."
+    };
+    return map[code] || "⚠️ Ocurrió un error. Intenta de nuevo.";
+  }
+
+  window.fb = {
+    signUp: async function(email, password) {
+      var cred = await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, "users", cred.user.uid), {
+        email: email,
+        credit: 0
+      });
+      return cred.user;
+    },
+    signIn: async function(email, password) {
+      var cred = await signInWithEmailAndPassword(auth, email, password);
+      return cred.user;
+    },
+    resetPassword: async function(email) {
+      await sendPasswordResetEmail(auth, email);
+    },
+    signOutUser: async function() {
+      if (creditUnsub) { creditUnsub(); creditUnsub = null; }
+      await signOut(auth);
+    },
+    watchCredit: function(uid, callback) {
+      if (creditUnsub) { creditUnsub(); }
+      creditUnsub = onSnapshot(doc(db, "users", uid), function(snap) {
+        if (snap.exists()) { callback(snap.data().credit || 0); }
+        else { callback(0); }
+      });
+    },
+    spendCredit: async function(uid, amount) {
+      return await runTransaction(db, async function(transaction) {
+        var ref = doc(db, "users", uid);
+        var snap = await transaction.get(ref);
+        var actual = snap.exists() ? (snap.data().credit || 0) : 0;
+        if (actual < amount) { throw new Error("insufficient"); }
+        var nuevo = Math.round((actual - amount) * 100) / 100;
+        transaction.update(ref, { credit: nuevo });
+        return nuevo;
+      });
+    },
+    traducirError: traducirError,
+    getCurrentUser: function() { return auth.currentUser; }
+  };
+
+  window.fbReady = true;
+  window.dispatchEvent(new Event("fbReady"));
+</script>
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 var idiomaActual = "es";
@@ -739,6 +868,10 @@ var textos = {
     loginSubtitle: "Inicia sesión para continuar", emailPlaceholder: "Correo electrónico", passwordPlaceholder: "Contraseña",
     loginButtonText: "INICIAR SESIÓN", createAccount: "Crear cuenta", loginErrorMsg: "⚠️ Completa el correo y la contraseña.",
     passwordLengthErrorMsg: "⚠️ La contraseña debe tener al menos 8 caracteres.",
+    registerTitle: "Crear cuenta", registerSubText: "Regístrate para guardar tu crédito", registerButtonText: "Crear cuenta",
+    confirmPasswordPlaceholder: "Confirmar contraseña",
+    forgotTitle: "Recuperar contraseña", forgotSubText: "Ingresa tu correo y te enviaremos un enlace", forgotButtonText: "Enviar",
+    noAccountFoundMsg: "No encontramos una cuenta con esos datos.",
     configTitle: "⚙️ Configuración", langOption: "Lenguaje", darkModeLabel: "🌙 Modo oscuro",
     viewProfile: "ver perfil ›", recharge: "RECARGAR", regionLabel: "Región",
     accountSummary: "Ver resumen de cuenta", transactions: "Transacciones", notifications: "Notificaciones",
@@ -764,6 +897,10 @@ var textos = {
     loginSubtitle: "Log in to continue", emailPlaceholder: "Email", passwordPlaceholder: "Password",
     loginButtonText: "LOG IN", createAccount: "Create account", loginErrorMsg: "⚠️ Please fill in email and password.",
     passwordLengthErrorMsg: "⚠️ Password must be at least 8 characters long.",
+    registerTitle: "Create account", registerSubText: "Sign up to save your credit", registerButtonText: "Create account",
+    confirmPasswordPlaceholder: "Confirm password",
+    forgotTitle: "Reset password", forgotSubText: "Enter your email and we'll send you a link", forgotButtonText: "Send",
+    noAccountFoundMsg: "We couldn't find an account with those details.",
     configTitle: "⚙️ Settings", langOption: "Language", darkModeLabel: "🌙 Dark mode",
     viewProfile: "view profile ›", recharge: "TOP UP", regionLabel: "Region",
     accountSummary: "View account summary", transactions: "Transactions", notifications: "Notifications",
@@ -816,24 +953,122 @@ togglePasswordBtn.addEventListener("click", function() {
     : '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>';
 });
 
+function activarToggleOjito(botonId) {
+  var boton = document.getElementById(botonId);
+  boton.addEventListener("click", function() {
+    var svg = boton.querySelector(".eye-icon");
+    var input = document.getElementById(svg.getAttribute("data-target"));
+    var isHidden = input.type === "password";
+    input.type = isHidden ? "text" : "password";
+    svg.innerHTML = isHidden
+      ? '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a19.4 19.4 0 0 1 4.22-5.44M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 7 11 7a19.4 19.4 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>';
+  });
+}
+activarToggleOjito("toggleRegisterPassword");
+activarToggleOjito("toggleRegisterPassword2");
+
+function activarCuentaEnApp(user) {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("app").style.display = "flex";
+  window.fb.watchCredit(user.uid, function(credit) {
+    var texto = "$" + Number(credit).toFixed(2);
+    document.getElementById("credit").innerText = texto;
+    document.getElementById("pmCredit").innerText = texto;
+  });
+}
+
 document.getElementById("loginButton").addEventListener("click", function() {
   var email = document.getElementById("email").value.trim();
   var password = document.getElementById("password").value.trim();
   var message = document.getElementById("loginMessage");
+  message.innerHTML = "";
   if (email === "" || password === "") {
     message.innerText = textos[idiomaActual].loginErrorMsg;
     return;
   }
-  if (!/^[^\s@]+@gmail\.com$/i.test(email)) {
-    message.innerText = "⚠️ El correo debe terminar en @gmail.com";
+  window.fb.signIn(email, password).then(function(user) {
+    document.getElementById("email").value = "";
+    document.getElementById("password").value = "";
+    activarCuentaEnApp(user);
+  }).catch(function(err) {
+    if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
+      message.innerHTML = '<div class="no-account-hint">😕 ' + textos[idiomaActual].noAccountFoundMsg + '<br><span class="create-account-inline" id="createAccountFromLogin">' + textos[idiomaActual].createAccount + ' →</span></div>';
+      document.getElementById("createAccountFromLogin").addEventListener("click", function() {
+        document.getElementById("registerEmail").value = email;
+        document.getElementById("registerPassword").value = "";
+        document.getElementById("registerPassword2").value = "";
+        document.getElementById("registerMessage").innerText = "";
+        registerModalOverlay.classList.add("show");
+      });
+    } else {
+      message.innerText = window.fb.traducirError(err.code);
+    }
+  });
+});
+
+var registerModalOverlay = document.getElementById("registerModalOverlay");
+document.querySelector(".create-account").addEventListener("click", function() {
+  document.getElementById("registerEmail").value = "";
+  document.getElementById("registerPassword").value = "";
+  document.getElementById("registerPassword2").value = "";
+  document.getElementById("registerMessage").innerText = "";
+  registerModalOverlay.classList.add("show");
+});
+document.getElementById("registerCancel").addEventListener("click", function() {
+  registerModalOverlay.classList.remove("show");
+});
+document.getElementById("registerConfirm").addEventListener("click", function() {
+  var email = document.getElementById("registerEmail").value.trim();
+  var password = document.getElementById("registerPassword").value.trim();
+  var password2 = document.getElementById("registerPassword2").value.trim();
+  var message = document.getElementById("registerMessage");
+  message.innerText = "";
+  if (email === "" || password === "" || password2 === "") {
+    message.innerText = "⚠️ Completa todos los campos.";
     return;
   }
-  if (password.length < 8) {
-    message.innerText = textos[idiomaActual].passwordLengthErrorMsg;
+  if (password !== password2) {
+    message.innerText = "⚠️ Las contraseñas no coinciden.";
     return;
   }
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("app").style.display = "flex";
+  if (password.length < 6) {
+    message.innerText = "⚠️ La contraseña debe tener al menos 6 caracteres.";
+    return;
+  }
+  window.fb.signUp(email, password).then(function(user) {
+    registerModalOverlay.classList.remove("show");
+    activarCuentaEnApp(user);
+  }).catch(function(err) {
+    message.innerText = window.fb.traducirError(err.code);
+  });
+});
+
+var forgotModalOverlay = document.getElementById("forgotModalOverlay");
+document.querySelector(".forgot-pass").addEventListener("click", function() {
+  document.getElementById("forgotEmail").value = document.getElementById("email").value.trim();
+  document.getElementById("forgotMessage").innerText = "";
+  document.getElementById("forgotMessage").style.color = "#ff8080";
+  forgotModalOverlay.classList.add("show");
+});
+document.getElementById("forgotCancel").addEventListener("click", function() {
+  forgotModalOverlay.classList.remove("show");
+});
+document.getElementById("forgotConfirm").addEventListener("click", function() {
+  var email = document.getElementById("forgotEmail").value.trim();
+  var message = document.getElementById("forgotMessage");
+  if (email === "") {
+    message.style.color = "#ff8080";
+    message.innerText = "⚠️ Escribe tu correo.";
+    return;
+  }
+  window.fb.resetPassword(email).then(function() {
+    message.style.color = "#7fdc8f";
+    message.innerText = "✅ Enlace enviado, revisa tu correo.";
+  }).catch(function(err) {
+    message.style.color = "#ff8080";
+    message.innerText = window.fb.traducirError(err.code);
+  });
 });
 
 var menuButton = document.getElementById("menuButton");
@@ -1331,32 +1566,26 @@ document.getElementById("modalCancel").addEventListener("click", function() {
 var transacciones = [];
 
 document.getElementById("modalConfirm").addEventListener("click", function() {
-  var creditoSpan = document.getElementById("credit");
-  var pmCreditoSpan = document.getElementById("pmCredit");
-  var creditoActual = parseFloat(creditoSpan.innerText.replace("$", ""));
+  var user = window.fb.getCurrentUser();
+  if (!user) return;
 
-  if (creditoActual < selectedPrice) {
+  window.fb.spendCredit(user.uid, selectedPrice).then(function() {
+    transacciones.unshift({
+      nombre: selectedPackage,
+      precio: selectedPrice.toFixed(2)
+    });
+
+    modalOverlay.classList.remove("show");
+    mostrarMensaje(textos[idiomaActual].purchaseSuccess.replace("{name}", verifiedName).replace("{id}", verifiedId));
+
+    shopView.style.display = "none";
+    homeView.style.display = "block";
+    resetShopForm();
+    window.scrollTo(0, 0);
+  }).catch(function() {
     modalOverlay.classList.remove("show");
     mostrarMensaje(textos[idiomaActual].insufficientCredit);
-    return;
-  }
-
-  var nuevoCredito = (creditoActual - selectedPrice).toFixed(2);
-  creditoSpan.innerText = "$" + nuevoCredito;
-  pmCreditoSpan.innerText = "$" + nuevoCredito;
-
-  transacciones.unshift({
-    nombre: selectedPackage,
-    precio: selectedPrice.toFixed(2)
   });
-
-  modalOverlay.classList.remove("show");
-  mostrarMensaje(textos[idiomaActual].purchaseSuccess.replace("{name}", verifiedName).replace("{id}", verifiedId));
-
-  shopView.style.display = "none";
-  homeView.style.display = "block";
-  resetShopForm();
-  window.scrollTo(0, 0);
 });
 
 var txModalOverlay = document.getElementById("txModalOverlay");
@@ -1394,6 +1623,8 @@ document.getElementById("closeTxModal").addEventListener("click", function() {
 document.getElementById("logoutBtn").addEventListener("click", function(event) {
   event.stopPropagation();
   profileMenu.classList.remove("show");
+
+  window.fb.signOutUser();
 
   document.getElementById("app").style.display = "none";
   document.getElementById("loginPage").style.display = "flex";
