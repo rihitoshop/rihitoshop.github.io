@@ -898,7 +898,7 @@ var textos = {
     registerTitle: "Crear cuenta", registerSubText: "Regístrate para guardar tu crédito", registerButtonText: "Crear cuenta",
     confirmPasswordPlaceholder: "Confirmar contraseña",
     forgotTitle: "Recuperar contraseña", forgotSubText: "Ingresa tu correo y te enviaremos un enlace", forgotButtonText: "Enviar",
-    noAccountFoundMsg: "No encontramos una cuenta con esos datos.",
+    noAccountFoundMsg: "Correo o contraseña incorrectos.",
     verificationSentMsg: "Te enviamos un correo de verificación. Ábrelo y da clic en el botón para activar tu cuenta.",
     emailNotVerifiedMsg: "Tu correo aún no está verificado. Revisa tu bandeja de entrada.",
     resendVerificationText: "Reenviar correo de verificación",
@@ -931,7 +931,7 @@ var textos = {
     registerTitle: "Create account", registerSubText: "Sign up to save your credit", registerButtonText: "Create account",
     confirmPasswordPlaceholder: "Confirm password",
     forgotTitle: "Reset password", forgotSubText: "Enter your email and we'll send you a link", forgotButtonText: "Send",
-    noAccountFoundMsg: "We couldn't find an account with those details.",
+    noAccountFoundMsg: "Incorrect email or password.",
     verificationSentMsg: "We sent you a verification email. Open it and click the button to activate your account.",
     emailNotVerifiedMsg: "Your email hasn't been verified yet. Check your inbox.",
     resendVerificationText: "Resend verification email",
@@ -1027,7 +1027,7 @@ document.getElementById("loginButton").addEventListener("click", function() {
     document.getElementById("password").value = "";
     activarCuentaEnApp(user);
   }).catch(function(err) {
-    message.innerHTML = '<div class="no-account-hint">😕 ' + textos[idiomaActual].noAccountFoundMsg + '<br><span class="create-account-inline" id="createAccountFromLogin">' + textos[idiomaActual].createAccount + ' →</span></div>';
+    message.innerHTML = '<div class="no-account-hint">' + textos[idiomaActual].noAccountFoundMsg + '<br><span class="create-account-inline" id="createAccountFromLogin">' + textos[idiomaActual].createAccount + ' →</span></div>';
     document.getElementById("createAccountFromLogin").addEventListener("click", function() {
       document.getElementById("registerEmail").value = email;
       document.getElementById("registerPassword").value = "";
