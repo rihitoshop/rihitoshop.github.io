@@ -264,6 +264,18 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,150,255,.1
 
 #shopView { display: none; }
 .back-row { margin-bottom: 16px; }
+
+/* ---------- Vista: Órdenes de recargas (Todas) ---------- */
+#ordersAllView { display: none; }
+.orders-all-title { font-size: 20px; font-weight: 800; color: #fff; margin: 4px 2px 6px; }
+.orders-all-filter { font-size: 13px; font-weight: 700; color: var(--blue); margin: 0 2px 14px; }
+.orders-search { position: relative; width: 100%; margin-bottom: 18px; }
+.orders-search input { width: 100%; padding: 13px 44px 13px 16px; background: #000; color: var(--text); border: 1px solid var(--blue-dim); border-radius: 12px; outline: none; font-size: 14px; margin-bottom: 0; }
+.orders-search input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,150,255,.15); }
+.orders-search input::placeholder { color: var(--muted); }
+.orders-search svg { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--muted); pointer-events: none; }
+.orders-all-divider { border: none; border-top: 1px solid var(--line); margin: 0 0 18px; }
+.orders-all-list { display: flex; flex-direction: column; gap: 14px; }
 .back-button { display: inline-flex; align-items: center; gap: 6px; padding: 10px 15px; border-radius: 10px; background: #000; border: 1px solid var(--line); color: #cfe3e8; font-size: 13px; cursor: pointer; }
 .back-button:hover { border-color: var(--blue); color: var(--blue); }
 
@@ -735,6 +747,25 @@ body.light .header::before, body.light .header::after { opacity: .1; }
 
         <button type="button" class="confirm-purchase-btn" id="confirmPurchaseBtn" data-i18n="confirmPurchaseText">Confirmar compra</button>
       </section>
+    </div>
+
+    <div id="ordersAllView">
+      <div class="back-row">
+        <button type="button" class="back-button" id="backFromOrdersAll">‹ Volver</button>
+      </div>
+
+      <div class="orders-all-title">Órdenes de recargas</div>
+
+      <div class="orders-all-filter">Todas las recargas</div>
+
+      <div class="orders-search">
+        <input type="text" id="ordersSearchInput" placeholder="Buscar orden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+
+      <hr class="orders-all-divider">
+
+      <div class="orders-all-list" id="ordersAllList"></div>
     </div>
 
   </main>
@@ -1265,10 +1296,25 @@ document.getElementById("ordersDropdownBtn").addEventListener("click", function(
 document.querySelectorAll(".orders-option").forEach(function(btn) {
   btn.addEventListener("click", function(event) {
     event.stopPropagation();
-    // Por ahora solo cierra el submenú; la lógica de filtrado se agrega después.
     document.getElementById("ordersOptions").classList.remove("show");
     document.getElementById("ordersArrow").classList.remove("open");
+    ordersMenu.classList.remove("show");
+
+    if (btn.getAttribute("data-status") === "todo") {
+      homeView.style.display = "none";
+      gamesView.style.display = "none";
+      shopView.style.display = "none";
+      ordersAllView.style.display = "block";
+      window.scrollTo(0, 0);
+    }
+    // El resto de filtros (completado, esperando, reembolso) se conectan después.
   });
+});
+
+document.getElementById("backFromOrdersAll").addEventListener("click", function() {
+  ordersAllView.style.display = "none";
+  homeView.style.display = "block";
+  window.scrollTo(0, 0);
 });
 
 profileButton.addEventListener("click", function(event) {
@@ -1423,6 +1469,7 @@ document.getElementById("rechargeBtn").addEventListener("click", function(event)
 var homeView = document.getElementById("homeView");
 var gamesView = document.getElementById("gamesView");
 var shopView = document.getElementById("shopView");
+var ordersAllView = document.getElementById("ordersAllView");
 
 document.getElementById("showGamesBtn").addEventListener("click", function() {
   marcarNavActivo(null);
