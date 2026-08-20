@@ -418,6 +418,17 @@ body.light .header::before, body.light .header::after { opacity: .1; }
   .card:last-child { border-bottom: none; }
   .store-card, .store-card-empty { width: 130px; }
 }
+
+/* ---- Vista "Ordenes de recargas" ---- */
+#ordersAllView { display: none; padding: 0 16px; }
+.orders-all-title { font-size: 18px; font-weight: 700; margin: 6px 0 2px; }
+.orders-all-filter { font-size: 13px; color: var(--blue); margin-bottom: 12px; }
+.orders-search { position: relative; margin-bottom: 12px; }
+.orders-search input { width: 100%; box-sizing: border-box; padding: 10px 36px 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: inherit; font-size: 13px; }
+.orders-search svg { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; opacity: .6; }
+.orders-all-divider { border: none; border-top: 1px solid var(--line); margin: 8px 0 12px; }
+.orders-all-list { display: flex; flex-direction: column; gap: 8px; }
+.orders-all-empty { text-align: center; color: #8fa3a8; font-size: 13px; padding: 30px 0; }
 </style>
 </head>
 <body>
@@ -735,6 +746,25 @@ body.light .header::before, body.light .header::after { opacity: .1; }
 
         <button type="button" class="confirm-purchase-btn" id="confirmPurchaseBtn" data-i18n="confirmPurchaseText">Confirmar compra</button>
       </section>
+    </div>
+
+    <div id="ordersAllView">
+      <div class="back-row">
+        <button type="button" class="back-button" id="backFromOrdersAll">‹ Volver</button>
+      </div>
+
+      <div class="orders-all-title">Órdenes de recargas</div>
+
+      <div class="orders-all-filter">Todas las recargas</div>
+
+      <div class="orders-search">
+        <input type="text" id="ordersSearchInput" placeholder="Buscar orden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+
+      <hr class="orders-all-divider">
+
+      <div class="orders-all-list" id="ordersAllList"></div>
     </div>
 
   </main>
@@ -1262,13 +1292,65 @@ document.getElementById("ordersDropdownBtn").addEventListener("click", function(
   document.getElementById("ordersArrow").classList.toggle("open");
 });
 
+var ordersAllView = document.getElementById("ordersAllView");
+
+var etiquetasFiltroOrdenes = {
+  todo: "Todas las recargas",
+  completado: "Completado",
+  esperando: "Esperando envío",
+  reembolso: "Reembolso"
+};
+
+function renderOrdersAllList(filtroTexto) {
+  var lista = document.getElementById("ordersAllList");
+  var texto = (filtroTexto || "").trim().toLowerCase();
+
+  var filtradas = transacciones.filter(function(tx) {
+    return !texto || tx.nombre.toLowerCase().indexOf(texto) !== -1;
+  });
+
+  if (filtradas.length === 0) {
+    lista.innerHTML = '<div class="orders-all-empty">No hay órdenes para mostrar.</div>';
+    return;
+  }
+
+  var html = "";
+  filtradas.forEach(function(tx) {
+    html += '<div class="tx-item"><span class="tx-name">' + tx.nombre + '</span><span class="tx-amount">-$' + tx.precio + '</span></div>';
+  });
+  lista.innerHTML = html;
+}
+
 document.querySelectorAll(".orders-option").forEach(function(btn) {
   btn.addEventListener("click", function(event) {
     event.stopPropagation();
-    // Por ahora solo cierra el submenú; la lógica de filtrado se agrega después.
     document.getElementById("ordersOptions").classList.remove("show");
     document.getElementById("ordersArrow").classList.remove("open");
+    ordersMenu.classList.remove("show");
+
+    var status = btn.getAttribute("data-status");
+    var etiqueta = etiquetasFiltroOrdenes[status] || "Todas las recargas";
+    document.querySelector("#ordersAllView .orders-all-filter").innerText = etiqueta;
+    document.getElementById("ordersSearchInput").value = "";
+
+    homeView.style.display = "none";
+    gamesView.style.display = "none";
+    shopView.style.display = "none";
+    ordersAllView.style.display = "block";
+    window.scrollTo(0, 0);
+
+    renderOrdersAllList("");
   });
+});
+
+document.getElementById("ordersSearchInput").addEventListener("input", function() {
+  renderOrdersAllList(this.value);
+});
+
+document.getElementById("backFromOrdersAll").addEventListener("click", function() {
+  ordersAllView.style.display = "none";
+  homeView.style.display = "block";
+  window.scrollTo(0, 0);
 });
 
 profileButton.addEventListener("click", function(event) {
