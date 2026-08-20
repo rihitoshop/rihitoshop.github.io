@@ -25,8 +25,14 @@ const {
   EMAIL_FROM,          // remitente de los correos, ej: RIHITO SHOP <onboarding@resend.dev>
   ADMIN_USER,          // usuario del panel de administrador
   ADMIN_PASSWORD,      // contraseña del panel de administrador
+  HLGAMING_USERUID,    // credenciales para verificar el ID de jugador de Free Fire
+  HLGAMING_APIKEY,
   PORT = 3000
 } = process.env;
+
+const HLGAMING_API_BASE = "https://proapis.hlgamingofficial.com/main/games/freefire/account/api";
+const HLGAMING_REGION = "na";
+const HLGAMING_REGIONES_PERMITIDAS = ["NA", "US"];
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
@@ -375,6 +381,67 @@ app.post('/api/admin/add-balance', requireAdmin, async (req, res) => {
     console.error(err);
     res.status(500).json({ error: 'Error del servidor' });
   }
+});
+
+// ============================================================
+// VERIFICAR ID DE JUGADOR (Free Fire) - via HL Gaming
+// ============================================================
+async function buscarJugador(uid) {
+  const url =
+    HLGAMING_API_BASE +
+    "?sectionName=AllData" +
+    "&PlayerUid=" + uid +
+    "&region=" + HLGAMING_REGION +
+    "&useruid=" + HLGAMING_USERUID +
+    "&api=" + HLGAMING_APIKEY;
+
+  const resp = await fetch(url);
+
+  let data = null;
+  try {
+    data = await resp.json();
+  } catch (e) {
+    data = null;
+  }
+
+  const accountInfo =
+    (data && data.result && data.result.AccountInfo) ||
+    (data && data.result && data.result.basicInfo) ||
+    null;
+
+  const nickname = accountInfo && (accountInfo.AccountName || accountInfo.nickname);
+  const regionReal = accountInfo && accountInfo.AccountRegion;
+
+  if (resp.ok && nickname && HLGAMING_REGIONES_PERMITIDAS.includes((regionReal || "").toUpperCase())) {
+    return { tipo: "ok", nickname: nickname, region: regionReal };
+  }
+
+  return { tipo: "error", status: 400, mensaje: "Región no disponible" };
+}
+
+app.get("/api/verificar-id/:uid", async function (req, res) {
+  const uid = req.params.uid;
+
+  if (!/^\d+$/.test(uid)) {
+    return res.status(400).json({ error: "ID inválido, solo se permiten números." });
+  }
+
+  if (!HLGAMING_USERUID || !HLGAMING_APIKEY) {
+    return res.status(500).json({ error: "Falta configurar las credenciales de HL Gaming en el servidor." });
+  }
+
+  let resultado;
+  try {
+    resultado = await buscarJugador(uid);
+  } catch (e) {
+    return res.status(502).json({ error: "No se pudo contactar al servicio de verificación: " + e.message });
+  }
+
+  if (resultado.tipo === "ok") {
+    return res.json({ nickname: resultado.nickname, region: resultado.region });
+  }
+
+  return res.status(resultado.status || 502).json({ error: resultado.mensaje });
 });
 
 // ---------- Ruta de prueba ----------
