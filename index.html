@@ -193,7 +193,8 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,150,255,.1
 .switch input:checked + .switch-track::before { transform: translateX(18px); }
 
 .profile-container { position: relative; flex-shrink: 0; }
-.profile-button { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--blue); background: #000; color: var(--blue); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; }
+.profile-button { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--blue); background: #000; color: var(--blue); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.profile-button img, .pm-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .profile-status-dot { position: absolute; bottom: 1px; right: 1px; width: 11px; height: 11px; border-radius: 50%; background: #22c55e; border: 2px solid #000; box-shadow: 0 0 6px rgba(34,197,94,.7); }
 .profile-menu { display: none; position: fixed; width: 210px; background: #000; border: 1px solid var(--blue-dim); border-radius: 14px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.6); z-index: 50; }
 .profile-menu.show { display: block; }
@@ -213,7 +214,7 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,150,255,.1
 #controlZoneBtn { margin-bottom: 4px; }
 #soporteBtn { margin-top: 4px; }
 .pm-head { display:flex; align-items:center; gap:10px; padding-bottom:9px; border-bottom:1px solid var(--line); margin-bottom:8px; }
-.pm-avatar { width:36px; height:36px; border-radius:50%; border:2px solid var(--blue); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.pm-avatar { width:36px; height:36px; border-radius:50%; border:2px solid var(--blue); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; overflow: hidden; }
 .pm-name { font-weight:bold; font-size:13px; }
 .pm-view-profile { font-size:10.5px; color: var(--blue); cursor:pointer; margin-top:2px; }
 .pm-credit-row { padding: 7px 2px 3px; }
@@ -429,6 +430,18 @@ body.light .header::before, body.light .header::after { opacity: .1; }
 .orders-all-divider { border: none; border-top: 1px solid var(--line); margin: 8px 0 12px; }
 .orders-all-list { display: flex; flex-direction: column; gap: 8px; }
 .orders-all-empty { text-align: center; color: #8fa3a8; font-size: 13px; padding: 30px 0; }
+
+/* ---- Vista "Perfil" ---- */
+#profileView { display: none; padding: 0 16px; }
+.profile-view-title { font-size: 18px; font-weight: 700; margin: 6px 0 20px; }
+.profile-photo-row { display: flex; align-items: center; gap: 18px; margin-bottom: 22px; }
+.profile-photo-big { width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--blue); display: flex; align-items: center; justify-content: center; font-size: 34px; flex-shrink: 0; overflow: hidden; background: #000; }
+.profile-photo-big img { width: 100%; height: 100%; object-fit: cover; }
+.profile-photo-actions { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.profile-photo-btn { padding: 10px 14px; border-radius: 10px; border: 1px solid var(--blue); background: transparent; color: var(--blue); font-size: 13px; cursor: pointer; }
+.profile-photo-btn:hover { background: rgba(96,220,255,.08); }
+.profile-photo-hint { font-size: 11px; color: #8fa3a8; margin-top: 2px; }
+.profile-photo-msg { min-height: 16px; font-size: 12px; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -552,7 +565,7 @@ body.light .header::before, body.light .header::after { opacity: .1; }
       <div class="header-right">
         <div class="credit"><span class="coin-icon"><img src="monedask.png" alt="SK"></span><span id="credit">$0.00</span></div>
         <div class="profile-container">
-          <button type="button" class="profile-button" id="profileButton">👤<span class="profile-status-dot"></span></button>
+          <button type="button" class="profile-button" id="profileButton"><span id="profileButtonEmoji">👤</span><span class="profile-status-dot"></span></button>
         </div>
       </div>
     </div>
@@ -581,7 +594,7 @@ body.light .header::before, body.light .header::after { opacity: .1; }
 
   <div class="profile-menu" id="profileMenu">
     <div class="pm-head">
-      <div class="pm-avatar">👤</div>
+      <div class="pm-avatar" id="pmAvatar">👤</div>
       <div>
         <div class="pm-name">RIHITO</div>
         <div class="pm-view-profile" id="viewProfileBtn" data-i18n="viewProfile">ver perfil ›</div>
@@ -767,6 +780,25 @@ body.light .header::before, body.light .header::after { opacity: .1; }
       <div class="orders-all-list" id="ordersAllList"></div>
     </div>
 
+    <div id="profileView">
+      <div class="back-row">
+        <button type="button" class="back-button" id="backFromProfile">‹ Volver</button>
+      </div>
+
+      <div class="profile-view-title">Perfil</div>
+
+      <div class="profile-photo-row">
+        <div class="profile-photo-big" id="profilePhotoBig">👤</div>
+        <div class="profile-photo-actions">
+          <button type="button" class="profile-photo-btn" id="changePhotoBtn">Cambiar foto</button>
+          <div class="profile-photo-hint">JPG, JPEG o PNG. Máximo 1MB.</div>
+          <div class="profile-photo-msg" id="profilePhotoMsg"></div>
+        </div>
+      </div>
+
+      <input type="file" id="avatarFileInput" accept="image/png, image/jpeg" style="display:none;">
+    </div>
+
   </main>
 
   <nav class="bottom-nav">
@@ -909,6 +941,20 @@ body.light .header::before, body.light .header::after { opacity: .1; }
     getCurrentUser: function() {
       if (!currentToken) return null;
       return { uid: currentEmail, email: currentEmail };
+    },
+    getProfile: async function() {
+      var resp = await fetch(API_URL + "/api/me", { headers: { Authorization: "Bearer " + currentToken } });
+      var data = await resp.json().catch(function() { return {}; });
+      if (!resp.ok) throw new Error(data.error || "Error del servidor");
+      return data;
+    },
+    uploadAvatar: async function(dataUrl) {
+      var data = await llamarApi("/api/me/avatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + currentToken },
+        body: JSON.stringify({ avatar: dataUrl })
+      });
+      return data.avatar_url;
     }
   };
 
@@ -1041,6 +1087,9 @@ function activarCuentaEnApp(user) {
     document.getElementById("credit").innerText = texto;
     document.getElementById("pmCredit").innerText = texto;
   });
+  window.fb.getProfile().then(function(data) {
+    aplicarAvatarUI(data.avatar_url || null);
+  }).catch(function() {});
 }
 
 document.getElementById("loginButton").addEventListener("click", function() {
@@ -1471,14 +1520,78 @@ darkModeToggle.addEventListener("change", function() {
   }
 });
 
-function abrirPerfil() {
-  // Aquí se abrirá la vista/función de perfil cuando esté activada.
-  // Cuando actives "ver perfil", agrega aquí el código y ambos botones
-  // (el del menú y el de la barra inferior) la usarán automáticamente.
+var profileView = document.getElementById("profileView");
+
+function aplicarAvatarUI(avatarUrl) {
+  var contenidoHeader = avatarUrl ? '<img src="' + avatarUrl + '" alt="Perfil">' : "👤";
+  var contenidoMenu = avatarUrl ? '<img src="' + avatarUrl + '" alt="Perfil">' : "👤";
+  var contenidoGrande = avatarUrl ? '<img src="' + avatarUrl + '" alt="Perfil">' : "👤";
+  document.getElementById("profileButtonEmoji").innerHTML = contenidoHeader;
+  document.getElementById("pmAvatar").innerHTML = contenidoMenu;
+  document.getElementById("profilePhotoBig").innerHTML = contenidoGrande;
 }
+
+function abrirPerfil() {
+  homeView.style.display = "none";
+  gamesView.style.display = "none";
+  shopView.style.display = "none";
+  ordersAllView.style.display = "none";
+  profileView.style.display = "block";
+  window.scrollTo(0, 0);
+}
+
+document.getElementById("backFromProfile").addEventListener("click", function() {
+  profileView.style.display = "none";
+  homeView.style.display = "block";
+  marcarNavActivo(document.getElementById("navHomeBtn"));
+  window.scrollTo(0, 0);
+});
+
+document.getElementById("changePhotoBtn").addEventListener("click", function() {
+  document.getElementById("avatarFileInput").click();
+});
+
+document.getElementById("avatarFileInput").addEventListener("change", function() {
+  var archivo = this.files && this.files[0];
+  var msg = document.getElementById("profilePhotoMsg");
+  msg.style.color = "#ff8080";
+  msg.innerText = "";
+
+  if (!archivo) return;
+
+  var tiposValidos = ["image/jpeg", "image/jpg", "image/png"];
+  if (tiposValidos.indexOf(archivo.type) === -1) {
+    msg.innerText = "Solo se permiten imágenes JPG, JPEG o PNG.";
+    this.value = "";
+    return;
+  }
+  if (archivo.size > 1024 * 1024) {
+    msg.innerText = "La imagen supera el tamaño máximo de 1MB.";
+    this.value = "";
+    return;
+  }
+
+  var lector = new FileReader();
+  lector.onload = function() {
+    var dataUrl = lector.result;
+    aplicarAvatarUI(dataUrl);
+    msg.style.color = "#7fdc8f";
+    msg.innerText = "Guardando...";
+
+    window.fb.uploadAvatar(dataUrl).then(function() {
+      msg.innerText = "Foto actualizada ✅";
+    }).catch(function(err) {
+      msg.style.color = "#ff8080";
+      msg.innerText = window.fb.traducirError(err.code || err.message);
+    });
+  };
+  lector.readAsDataURL(archivo);
+});
 
 document.getElementById("viewProfileBtn").addEventListener("click", function(event) {
   event.stopPropagation();
+  profileMenu.classList.remove("show");
+  marcarNavActivo(document.getElementById("navProfileBtn"));
   abrirPerfil();
 });
 
@@ -1539,6 +1652,8 @@ document.getElementById("navHomeBtn").addEventListener("click", function() {
   marcarNavActivo(this);
   shopView.style.display = "none";
   gamesView.style.display = "none";
+  ordersAllView.style.display = "none";
+  profileView.style.display = "none";
   homeView.style.display = "block";
   resetShopForm();
   window.scrollTo(0, 0);
@@ -1828,12 +1943,17 @@ document.getElementById("logoutBtn").addEventListener("click", function(event) {
 
   shopView.style.display = "none";
   gamesView.style.display = "none";
+  ordersAllView.style.display = "none";
+  profileView.style.display = "none";
   homeView.style.display = "block";
   resetShopForm();
 
   document.getElementById("credit").innerText = "$0.00";
   document.getElementById("pmCredit").innerText = "$0.00";
   transacciones = [];
+  aplicarAvatarUI(null);
+  document.getElementById("avatarFileInput").value = "";
+  document.getElementById("profilePhotoMsg").innerText = "";
 
   mostrarMensaje(textos[idiomaActual].logoutMsg);
 });
