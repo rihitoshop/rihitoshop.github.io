@@ -14,7 +14,7 @@ const { Resend } = require('resend');
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "2mb" }));
 app.use(express.static('public'));
 
 // ---------- Configuracion (viene de variables de entorno en Render) ----------
@@ -53,6 +53,7 @@ async function initDb() {
       created_at TIMESTAMP DEFAULT NOW()
     );
   `);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;`);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS verification_codes (
       id SERIAL PRIMARY KEY,
@@ -304,9 +305,38 @@ app.post('/api/forgot-password/reset', async (req, res) => {
 // SALDO - consultar (usuario logueado)
 // ============================================================
 app.get('/api/me', requireAuth, async (req, res) => {
-  const result = await pool.query('SELECT email, balance FROM users WHERE id = $1', [req.usuario.id]);
+  const result = await pool.query('SELECT email, balance, avatar_url FROM users WHERE id = $1', [req.usuario.id]);
   if (result.rows.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
   res.json(result.rows[0]);
+});
+
+// ============================================================
+// PERFIL - subir/cambiar foto de perfil
+// ============================================================
+app.post('/api/me/avatar', requireAuth, async (req, res) => {
+  try {
+    const { avatar } = req.body;
+    if (!avatar || typeof avatar !== 'string') {
+      return res.status(400).json({ error: 'Falta la imagen' });
+    }
+
+    const match = avatar.match(/^data:image\/(jpeg|jpg|png);base64,([A-Za-z0-9+/=]+)$/);
+    if (!match) {
+      return res.status(400).json({ error: 'Formato de imagen no válido. Usa JPG, JPEG o PNG.' });
+    }
+
+    const base64Data = match[2];
+    const tamanoBytes = Math.ceil(base64Data.length * 0.75);
+    if (tamanoBytes > 1024 * 1024) {
+      return res.status(400).json({ error: 'La imagen supera el tamaño máximo de 1MB.' });
+    }
+
+    await pool.query('UPDATE users SET avatar_url = $1 WHERE id = $2', [avatar, req.usuario.id]);
+    res.json({ ok: true, avatar_url: avatar });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
 });
 
 // ============================================================
