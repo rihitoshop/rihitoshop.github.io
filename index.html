@@ -1384,9 +1384,7 @@ document.querySelectorAll(".orders-option").forEach(function(btn) {
     document.querySelector("#ordersAllView .orders-all-filter").innerText = etiqueta;
     document.getElementById("ordersSearchInput").value = "";
 
-    homeView.style.display = "none";
-    gamesView.style.display = "none";
-    shopView.style.display = "none";
+    ocultarTodasLasVistas();
     ordersAllView.style.display = "block";
     window.scrollTo(0, 0);
 
@@ -1399,8 +1397,9 @@ document.getElementById("ordersSearchInput").addEventListener("input", function(
 });
 
 document.getElementById("backFromOrdersAll").addEventListener("click", function() {
-  ordersAllView.style.display = "none";
+  ocultarTodasLasVistas();
   homeView.style.display = "block";
+  marcarNavActivo(document.getElementById("navHomeBtn"));
   window.scrollTo(0, 0);
 });
 
@@ -1542,16 +1541,13 @@ function aplicarAvatarUI(avatarUrl) {
 }
 
 function abrirPerfil() {
-  homeView.style.display = "none";
-  gamesView.style.display = "none";
-  shopView.style.display = "none";
-  ordersAllView.style.display = "none";
+  ocultarTodasLasVistas();
   profileView.style.display = "block";
   window.scrollTo(0, 0);
 }
 
 document.getElementById("backFromProfile").addEventListener("click", function() {
-  profileView.style.display = "none";
+  ocultarTodasLasVistas();
   homeView.style.display = "block";
   marcarNavActivo(document.getElementById("navHomeBtn"));
   window.scrollTo(0, 0);
@@ -1629,9 +1625,17 @@ var homeView = document.getElementById("homeView");
 var gamesView = document.getElementById("gamesView");
 var shopView = document.getElementById("shopView");
 
+function ocultarTodasLasVistas() {
+  homeView.style.display = "none";
+  gamesView.style.display = "none";
+  shopView.style.display = "none";
+  ordersAllView.style.display = "none";
+  profileView.style.display = "none";
+}
+
 document.getElementById("showGamesBtn").addEventListener("click", function() {
   marcarNavActivo(null);
-  homeView.style.display = "none";
+  ocultarTodasLasVistas();
   gamesView.style.display = "block";
   window.scrollTo(0, 0);
 });
@@ -1660,10 +1664,7 @@ document.getElementById("backToHome").addEventListener("click", function() {
 
 document.getElementById("navHomeBtn").addEventListener("click", function() {
   marcarNavActivo(this);
-  shopView.style.display = "none";
-  gamesView.style.display = "none";
-  ordersAllView.style.display = "none";
-  profileView.style.display = "none";
+  ocultarTodasLasVistas();
   homeView.style.display = "block";
   resetShopForm();
   window.scrollTo(0, 0);
@@ -1675,8 +1676,7 @@ document.getElementById("controlZoneBtn").addEventListener("click", function(eve
   event.stopPropagation();
   ordersMenu.classList.remove("show");
   marcarNavActivo(document.getElementById("navHomeBtn"));
-  shopView.style.display = "none";
-  gamesView.style.display = "none";
+  ocultarTodasLasVistas();
   homeView.style.display = "block";
   resetShopForm();
   window.scrollTo(0, 0);
