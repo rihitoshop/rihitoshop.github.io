@@ -54,6 +54,7 @@ async function initDb() {
     );
   `);
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS username TEXT;`);
   await pool.query(`
     CREATE TABLE IF NOT EXISTS verification_codes (
       id SERIAL PRIMARY KEY,
@@ -305,9 +306,38 @@ app.post('/api/forgot-password/reset', async (req, res) => {
 // SALDO - consultar (usuario logueado)
 // ============================================================
 app.get('/api/me', requireAuth, async (req, res) => {
-  const result = await pool.query('SELECT email, balance, avatar_url FROM users WHERE id = $1', [req.usuario.id]);
+  const result = await pool.query('SELECT email, balance, avatar_url, username FROM users WHERE id = $1', [req.usuario.id]);
   if (result.rows.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
   res.json(result.rows[0]);
+});
+
+// ============================================================
+// PERFIL - cambiar nombre de usuario
+// ============================================================
+app.post('/api/me/username', requireAuth, async (req, res) => {
+  try {
+    let { username } = req.body;
+    if (typeof username !== 'string') {
+      return res.status(400).json({ error: 'Nombre de usuario inválido' });
+    }
+    username = username.trim();
+
+    if (username.length > 0) {
+      if (username.length < 3 || username.length > 20) {
+        return res.status(400).json({ error: 'El nombre de usuario debe tener entre 3 y 20 caracteres.' });
+      }
+      if (!/^[A-Za-z0-9_ ]+$/.test(username)) {
+        return res.status(400).json({ error: 'Solo se permiten letras, números, espacios y guion bajo.' });
+      }
+    }
+
+    const valorFinal = username.length > 0 ? username : null;
+    await pool.query('UPDATE users SET username = $1 WHERE id = $2', [valorFinal, req.usuario.id]);
+    res.json({ ok: true, username: valorFinal });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
 });
 
 // ============================================================
