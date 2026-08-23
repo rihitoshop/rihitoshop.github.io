@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RIHITO SHOP</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="favicon-512.png">
+<link rel="apple-touch-icon" href="favicon-192.png">
 <style>
 :root{
   --bg:#000000;
@@ -444,6 +448,12 @@ body.light .header::before, body.light .header::after { opacity: .1; }
 .profile-photo-btn:hover { background: rgba(96,220,255,.08); }
 .profile-photo-hint { font-size: 11px; color: #8fa3a8; margin-top: 2px; }
 .profile-photo-msg { min-height: 16px; font-size: 12px; margin-top: 4px; }
+.profile-section-divider { border: none; border-top: 1px solid var(--line); margin: 22px 0; }
+.profile-field-label { font-size: 13px; color: #8fa3a8; margin-bottom: 8px; }
+.profile-field-row { display: flex; gap: 8px; }
+.profile-field-row input { flex: 1; box-sizing: border-box; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: inherit; font-size: 14px; }
+.profile-field-row button { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--blue); background: transparent; color: var(--blue); font-size: 13px; cursor: pointer; white-space: nowrap; }
+.profile-field-row button:hover { background: rgba(96,220,255,.08); }
 </style>
 </head>
 <body>
@@ -598,7 +608,7 @@ body.light .header::before, body.light .header::after { opacity: .1; }
     <div class="pm-head">
       <div class="pm-avatar" id="pmAvatar">👤</div>
       <div>
-        <div class="pm-name">RIHITO</div>
+        <div class="pm-name" id="pmName">RIHITO</div>
         <div class="pm-view-profile" id="viewProfileBtn" data-i18n="viewProfile">ver perfil ›</div>
       </div>
     </div>
@@ -799,6 +809,15 @@ body.light .header::before, body.light .header::after { opacity: .1; }
       </div>
 
       <input type="file" id="avatarFileInput" accept="image/png, image/jpeg" style="display:none;">
+
+      <hr class="profile-section-divider">
+
+      <div class="profile-field-label">Nombre de usuario</div>
+      <div class="profile-field-row">
+        <input type="text" id="usernameInput" placeholder="Aún no tienes nombre de usuario" maxlength="20">
+        <button type="button" id="saveUsernameBtn">Guardar</button>
+      </div>
+      <div class="profile-photo-msg" id="usernameMsg"></div>
     </div>
 
   </main>
@@ -957,6 +976,14 @@ body.light .header::before, body.light .header::after { opacity: .1; }
         body: JSON.stringify({ avatar: dataUrl })
       });
       return data.avatar_url;
+    },
+    updateUsername: async function(username) {
+      var data = await llamarApi("/api/me/username", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + currentToken },
+        body: JSON.stringify({ username: username })
+      });
+      return data.username;
     }
   };
 
@@ -1091,6 +1118,8 @@ function activarCuentaEnApp(user) {
   });
   window.fb.getProfile().then(function(data) {
     aplicarAvatarUI(data.avatar_url || null);
+    aplicarNombreUI(data.username || null, data.email);
+    document.getElementById("usernameInput").value = data.username || "";
   }).catch(function() {});
 }
 
@@ -1523,6 +1552,20 @@ darkModeToggle.addEventListener("change", function() {
 
 var profileView = document.getElementById("profileView");
 
+function acortarCorreo(email) {
+  if (!email) return "";
+  if (email.length <= 24) return email;
+  var partes = email.split("@");
+  var local = partes[0];
+  var dominio = partes[1] || "";
+  return local.slice(0, 14) + "..." + "@" + dominio;
+}
+
+function aplicarNombreUI(username, email) {
+  var texto = username ? username : acortarCorreo(email);
+  document.getElementById("pmName").innerText = texto;
+}
+
 function aplicarAvatarUI(avatarUrl) {
   var contenidoHeader = avatarUrl ? '<img src="' + avatarUrl + '" alt="Perfil">' : "👤";
   var contenidoMenu = avatarUrl ? '<img src="' + avatarUrl + '" alt="Perfil">' : "👤";
@@ -1592,6 +1635,23 @@ document.getElementById("avatarFileInput").addEventListener("change", function()
     });
   };
   lector.readAsDataURL(archivo);
+});
+
+document.getElementById("saveUsernameBtn").addEventListener("click", function() {
+  var valor = document.getElementById("usernameInput").value.trim();
+  var msg = document.getElementById("usernameMsg");
+  msg.style.color = "#7fdc8f";
+  msg.innerText = "Guardando...";
+
+  window.fb.updateUsername(valor).then(function(usernameGuardado) {
+    var email = window.fb.getCurrentUser().email;
+    aplicarNombreUI(usernameGuardado, email);
+    msg.style.color = "#7fdc8f";
+    msg.innerText = usernameGuardado ? "Nombre de usuario actualizado ✅" : "Nombre de usuario eliminado ✅";
+  }).catch(function(err) {
+    msg.style.color = "#ff8080";
+    msg.innerText = window.fb.traducirError(err.code || err.message);
+  });
 });
 
 document.getElementById("viewProfileBtn").addEventListener("click", function(event) {
@@ -1964,6 +2024,9 @@ document.getElementById("logoutBtn").addEventListener("click", function(event) {
   aplicarAvatarUI(null);
   document.getElementById("avatarFileInput").value = "";
   document.getElementById("profilePhotoMsg").innerText = "";
+  document.getElementById("pmName").innerText = "";
+  document.getElementById("usernameInput").value = "";
+  document.getElementById("usernameMsg").innerText = "";
 
   mostrarMensaje(textos[idiomaActual].logoutMsg);
 });
