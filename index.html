@@ -8,6 +8,11 @@
 <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="favicon-512.png">
 <link rel="apple-touch-icon" href="favicon-192.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="RIHITO SHOP">
 <style>
 :root{
   --bg:#000000;
@@ -221,7 +226,7 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,150,255,.1
 #soporteBtn { margin-top: 4px; }
 .pm-head { display:flex; align-items:center; gap:10px; padding-bottom:9px; border-bottom:1px solid var(--line); margin-bottom:8px; }
 .pm-avatar { width:36px; height:36px; border-radius:50%; border:2px solid var(--blue); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; overflow: hidden; box-sizing: border-box; }
-.pm-name { font-weight:bold; font-size:13px; }
+.pm-name { font-weight:bold; font-size:13px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pm-view-profile { font-size:10.5px; color: var(--blue); cursor:pointer; margin-top:2px; }
 .pm-credit-row { padding: 7px 2px 3px; }
 .pm-credit-amount { display:flex; align-items:center; gap:6px; font-size:16px; font-weight:bold; color: var(--text); }
@@ -1554,11 +1559,9 @@ var profileView = document.getElementById("profileView");
 
 function acortarCorreo(email) {
   if (!email) return "";
-  if (email.length <= 24) return email;
-  var partes = email.split("@");
-  var local = partes[0];
-  var dominio = partes[1] || "";
-  return local.slice(0, 14) + "..." + "@" + dominio;
+  var maxLargo = 20;
+  if (email.length <= maxLargo) return email;
+  return email.slice(0, maxLargo - 3) + "...";
 }
 
 function aplicarNombreUI(username, email) {
