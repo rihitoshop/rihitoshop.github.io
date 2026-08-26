@@ -444,7 +444,8 @@ body.light .header::before, body.light .header::after { opacity: .1; }
 
 /* ---- Vista "Perfil" ---- */
 #profileView { display: none; padding: 0 16px; }
-.profile-view-title { font-size: 18px; font-weight: 700; margin: 6px 0 20px; }
+#profileView .back-row { margin-top: -12px; }
+.profile-view-title { font-size: 18px; font-weight: 700; margin: 2px 0 16px; }
 .profile-photo-row { display: flex; align-items: center; gap: 18px; margin-bottom: 22px; }
 .profile-photo-big { width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--blue); display: flex; align-items: center; justify-content: center; font-size: 34px; flex-shrink: 0; overflow: hidden; background: #000; box-sizing: border-box; }
 .profile-photo-big img { width: 100%; height: 100%; object-fit: cover; }
@@ -459,6 +460,7 @@ body.light .header::before, body.light .header::after { opacity: .1; }
 .profile-field-row input { flex: 1; height: 42px; box-sizing: border-box; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: inherit; font-size: 14px; line-height: normal; }
 .profile-field-row button { height: 42px; box-sizing: border-box; padding: 0 14px; border-radius: 10px; border: 1px solid var(--blue); background: transparent; color: var(--blue); font-size: 14px; cursor: pointer; white-space: nowrap; display: flex; align-items: center; justify-content: center; }
 .profile-field-row button:hover { background: rgba(96,220,255,.08); }
+.profile-field-row input[readonly] { color: #8fa3a8; cursor: default; }
 </style>
 </head>
 <body>
@@ -823,6 +825,11 @@ body.light .header::before, body.light .header::after { opacity: .1; }
         <button type="button" id="saveUsernameBtn">Guardar</button>
       </div>
       <div class="profile-photo-msg" id="usernameMsg"></div>
+
+      <div class="profile-field-label" style="margin-top:18px;">Correo electrónico</div>
+      <div class="profile-field-row">
+        <input type="text" id="profileEmailDisplay" readonly>
+      </div>
     </div>
 
   </main>
@@ -1125,6 +1132,7 @@ function activarCuentaEnApp(user) {
     aplicarAvatarUI(data.avatar_url || null);
     aplicarNombreUI(data.username || null, data.email);
     document.getElementById("usernameInput").value = data.username || "";
+    document.getElementById("profileEmailDisplay").value = data.email || "";
   }).catch(function() {});
 }
 
@@ -2030,6 +2038,7 @@ document.getElementById("logoutBtn").addEventListener("click", function(event) {
   document.getElementById("pmName").innerText = "";
   document.getElementById("usernameInput").value = "";
   document.getElementById("usernameMsg").innerText = "";
+  document.getElementById("profileEmailDisplay").value = "";
 
   mostrarMensaje(textos[idiomaActual].logoutMsg);
 });
