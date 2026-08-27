@@ -826,10 +826,14 @@ body.light .header::before, body.light .header::after { opacity: .1; }
       </div>
       <div class="profile-photo-msg" id="usernameMsg"></div>
 
-      <div class="profile-field-label" style="margin-top:18px;">Correo electrónico</div>
+      <div class="profile-field-label" style="margin-top:10px;">Correo electrónico</div>
       <div class="profile-field-row">
         <input type="text" id="profileEmailDisplay" readonly>
       </div>
+
+      <div class="profile-field-label" id="memberSinceLabel" style="margin-top:14px;"></div>
+
+      <button type="button" class="back-button" id="logoutFromProfileBtn" style="margin-top:22px; color:#ff6b6b; border-color:#ff6b6b;">Cerrar sesión</button>
     </div>
 
   </main>
@@ -1133,6 +1137,11 @@ function activarCuentaEnApp(user) {
     aplicarNombreUI(data.username || null, data.email);
     document.getElementById("usernameInput").value = data.username || "";
     document.getElementById("profileEmailDisplay").value = data.email || "";
+    if (data.created_at) {
+      var fecha = new Date(data.created_at);
+      var textoFecha = fecha.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+      document.getElementById("memberSinceLabel").innerText = "Cliente desde el " + textoFecha;
+    }
   }).catch(function() {});
 }
 
@@ -1634,6 +1643,10 @@ document.getElementById("avatarFileInput").addEventListener("change", function()
   var lector = new FileReader();
   lector.onload = function() {
     var dataUrl = lector.result;
+    if (!confirm("¿Seguro que quieres cambiar tu foto de perfil?")) {
+      this_input_reset();
+      return;
+    }
     aplicarAvatarUI(dataUrl);
     msg.style.color = "#7fdc8f";
     msg.innerText = "Guardando...";
@@ -1645,12 +1658,22 @@ document.getElementById("avatarFileInput").addEventListener("change", function()
       msg.innerText = window.fb.traducirError(err.code || err.message);
     });
   };
+
+  function this_input_reset() {
+    document.getElementById("avatarFileInput").value = "";
+  }
+
   lector.readAsDataURL(archivo);
 });
 
 document.getElementById("saveUsernameBtn").addEventListener("click", function() {
   var valor = document.getElementById("usernameInput").value.trim();
   var msg = document.getElementById("usernameMsg");
+
+  if (!confirm("¿Seguro que quieres cambiar tu nombre de usuario?")) {
+    return;
+  }
+
   msg.style.color = "#7fdc8f";
   msg.innerText = "Guardando...";
 
@@ -2009,10 +2032,7 @@ document.getElementById("closeTxModal").addEventListener("click", function() {
   txModalOverlay.classList.remove("show");
 });
 
-document.getElementById("logoutBtn").addEventListener("click", function(event) {
-  event.stopPropagation();
-  profileMenu.classList.remove("show");
-
+function cerrarSesionCompleto() {
   window.fb.signOutUser();
 
   document.getElementById("app").style.display = "none";
@@ -2022,10 +2042,7 @@ document.getElementById("logoutBtn").addEventListener("click", function(event) {
   document.getElementById("password").value = "";
   document.getElementById("loginMessage").innerText = "";
 
-  shopView.style.display = "none";
-  gamesView.style.display = "none";
-  ordersAllView.style.display = "none";
-  profileView.style.display = "none";
+  ocultarTodasLasVistas();
   homeView.style.display = "block";
   resetShopForm();
 
@@ -2039,8 +2056,21 @@ document.getElementById("logoutBtn").addEventListener("click", function(event) {
   document.getElementById("usernameInput").value = "";
   document.getElementById("usernameMsg").innerText = "";
   document.getElementById("profileEmailDisplay").value = "";
+  document.getElementById("memberSinceLabel").innerText = "";
 
   mostrarMensaje(textos[idiomaActual].logoutMsg);
+}
+
+document.getElementById("logoutBtn").addEventListener("click", function(event) {
+  event.stopPropagation();
+  profileMenu.classList.remove("show");
+  cerrarSesionCompleto();
+});
+
+document.getElementById("logoutFromProfileBtn").addEventListener("click", function() {
+  if (confirm("¿Seguro que quieres cerrar sesión?")) {
+    cerrarSesionCompleto();
+  }
 });
 
 aplicarIdioma("es");
