@@ -306,7 +306,7 @@ app.post('/api/forgot-password/reset', async (req, res) => {
 // SALDO - consultar (usuario logueado)
 // ============================================================
 app.get('/api/me', requireAuth, async (req, res) => {
-  const result = await pool.query('SELECT email, balance, avatar_url, username FROM users WHERE id = $1', [req.usuario.id]);
+  const result = await pool.query('SELECT email, balance, avatar_url, username, created_at FROM users WHERE id = $1', [req.usuario.id]);
   if (result.rows.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
   res.json(result.rows[0]);
 });
