@@ -461,6 +461,11 @@ body.light .header::before, body.light .header::after { opacity: .1; }
 .profile-field-row button { height: 42px; box-sizing: border-box; padding: 0 14px; border-radius: 10px; border: 1px solid var(--blue); background: transparent; color: var(--blue); font-size: 14px; cursor: pointer; white-space: nowrap; display: flex; align-items: center; justify-content: center; }
 .profile-field-row button:hover { background: rgba(96,220,255,.08); }
 .profile-field-row input[readonly] { color: #8fa3a8; cursor: default; }
+.profile-section-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; color: #cfe3e8; }
+.profile-info-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; font-size: 13.5px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.profile-info-row span:first-child { color: #8fa3a8; }
+.profile-info-row span:last-child { font-weight: 600; text-align: right; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-info-row:last-child { border-bottom: none; }
 </style>
 </head>
 <body>
@@ -826,14 +831,37 @@ body.light .header::before, body.light .header::after { opacity: .1; }
       </div>
       <div class="profile-photo-msg" id="usernameMsg"></div>
 
-      <div class="profile-field-label" style="margin-top:10px;">Correo electrónico</div>
-      <div class="profile-field-row">
-        <input type="text" id="profileEmailDisplay" readonly>
+      <hr class="profile-section-divider">
+
+      <div class="profile-section-title">Información de la cuenta</div>
+      <div class="profile-info-row">
+        <span>ID de cliente</span>
+        <span id="profileClientId">—</span>
+      </div>
+      <div class="profile-info-row">
+        <span>Correo electrónico</span>
+        <span id="profileEmailInfo">—</span>
+      </div>
+      <div class="profile-info-row">
+        <span>Idioma</span>
+        <span id="profileLangInfo">Español</span>
+      </div>
+      <div class="profile-info-row">
+        <span>Notificaciones</span>
+        <span>Activadas</span>
+      </div>
+      <div class="profile-info-row">
+        <span>Cliente desde</span>
+        <span id="profileSinceInfo">—</span>
       </div>
 
-      <div class="profile-field-label" id="memberSinceLabel" style="margin-top:14px;"></div>
+      <hr class="profile-section-divider">
 
-      <button type="button" class="back-button" id="logoutFromProfileBtn" style="margin-top:22px; color:#ff6b6b; border-color:#ff6b6b;">Cerrar sesión</button>
+      <button type="button" class="profile-photo-btn" id="profileSupportBtn">💬 Contactar soporte</button>
+
+      <hr class="profile-section-divider">
+
+      <button type="button" class="back-button" id="logoutFromProfileBtn" style="color:#ff6b6b; border-color:#ff6b6b;">Cerrar sesión</button>
     </div>
 
   </main>
@@ -1082,6 +1110,7 @@ var textos = {
 
 function aplicarIdioma(lang) {
   idiomaActual = lang;
+  actualizarIdiomaEnPerfil();
   var t = textos[lang];
   document.querySelectorAll("[data-i18n]").forEach(function(el) {
     var key = el.getAttribute("data-i18n");
@@ -1136,13 +1165,24 @@ function activarCuentaEnApp(user) {
     aplicarAvatarUI(data.avatar_url || null);
     aplicarNombreUI(data.username || null, data.email);
     document.getElementById("usernameInput").value = data.username || "";
-    document.getElementById("profileEmailDisplay").value = data.email || "";
+    document.getElementById("profileEmailInfo").innerText = data.email || "—";
+    if (data.id) {
+      document.getElementById("profileClientId").innerText = "#" + String(data.id).padStart(6, "0");
+    }
     if (data.created_at) {
       var fecha = new Date(data.created_at);
       var textoFecha = fecha.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
-      document.getElementById("memberSinceLabel").innerText = "Cliente desde el " + textoFecha;
+      document.getElementById("profileSinceInfo").innerText = textoFecha;
     }
+    actualizarIdiomaEnPerfil();
   }).catch(function() {});
+}
+
+function actualizarIdiomaEnPerfil() {
+  var etiqueta = document.getElementById("profileLangInfo");
+  if (etiqueta) {
+    etiqueta.innerText = idiomaActual === "en" ? "English" : "Español";
+  }
 }
 
 document.getElementById("loginButton").addEventListener("click", function() {
@@ -1776,11 +1816,19 @@ document.getElementById("controlZoneBtn").addEventListener("click", function(eve
   window.scrollTo(0, 0);
 });
 
+function abrirSoporteWhatsapp() {
+  var mensaje = encodeURIComponent("Hola RIHITO SK tengo un problema con la web");
+  window.open("https://wa.me/5351557831?text=" + mensaje, "_blank");
+}
+
 document.getElementById("soporteBtn").addEventListener("click", function(event) {
   event.stopPropagation();
   ordersMenu.classList.remove("show");
-  var mensaje = encodeURIComponent("Hola RIHITO SK tengo un problema con la web");
-  window.open("https://wa.me/5351557831?text=" + mensaje, "_blank");
+  abrirSoporteWhatsapp();
+});
+
+document.getElementById("profileSupportBtn").addEventListener("click", function() {
+  abrirSoporteWhatsapp();
 });
 
 var messageBox = document.getElementById("message");
@@ -2055,8 +2103,9 @@ function cerrarSesionCompleto() {
   document.getElementById("pmName").innerText = "";
   document.getElementById("usernameInput").value = "";
   document.getElementById("usernameMsg").innerText = "";
-  document.getElementById("profileEmailDisplay").value = "";
-  document.getElementById("memberSinceLabel").innerText = "";
+  document.getElementById("profileEmailInfo").innerText = "—";
+  document.getElementById("profileClientId").innerText = "—";
+  document.getElementById("profileSinceInfo").innerText = "—";
 
   mostrarMensaje(textos[idiomaActual].logoutMsg);
 }
